@@ -2,6 +2,8 @@
 
 A Python toolkit for analyzing GPX tracks from sailing regattas.
 
+> **Note:** This project was created with assistance from Windsurf and Claude 3.7 Sonnet.
+
 ## Features
 
 - Parse GPX files into trackpoint objects
@@ -25,10 +27,21 @@ The optional `bearing_threshold` parameter (default: 20°) controls how sensitiv
 ### Visualizing a GPX track
 
 ```bash
-python3 src/generate_track_html.py your_track.gpx [bearing_threshold]
+python3 src/generate_track_html.py your_track.gpx [bearing_threshold] [start_segment] [end_segment] [output_file] [buoys_file] [wind_direction]
 ```
 
-This creates an HTML file in the `output` directory with an interactive map visualization. The HTML file will automatically open in your default browser.
+The optional `bearing_threshold` parameter (default: 20°) controls how sensitive the segmentation is to direction changes. A lower value creates more segments.
+
+The optional `start_segment` and `end_segment` parameters allow you to specify a range of segments to visualize. These should be zero-based indices.
+
+The optional `output_file` parameter allows you to specify the output file name. If not specified, the default is `track_visualization.html`.
+
+The optional `buoys_file` parameter allows you to specify a JSON file containing buoy coordinates. The file should be in the format `[{"lat": lat, "lon": lon, "name": name}, ...]`.
+
+The optional `wind_direction` parameter allows you to specify the wind direction in degrees (where wind is coming FROM).
+
+This creates an HTML file in the `docs` directory with an interactive map visualization. The HTML file will automatically open in your default browser.
+
 
 ### Using the geo_utils library in your own code
 
