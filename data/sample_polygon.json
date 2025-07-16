@@ -1,0 +1,48 @@
+[
+    {
+      "type": "marker",
+      "name": "Buoy 2",
+      "lat": 54.402109,
+      "lon": 18.758756
+    },
+    {
+      "type": "line",
+      "name": "Start Line",
+      "color": "#FF0000",
+      "width": 3,
+      "points": [
+        {
+          "lat": 54.393273,
+          "lon": 18.780217
+        },
+        {
+          "lat": 54.405538,
+          "lon": 18.779101
+        }
+      ]
+    },
+    {
+      "type": "polygon",
+      "name": "Course Boundary",
+      "color": "#0000FF",
+      "width": 2,
+      "fill": true,
+      "fillColor": "#0000FF",
+      "fillOpacity": 0.1,
+      "points": [
+        {
+          "lat": 54.393273,
+          "lon": 18.780217
+        },
+        {
+          "lat": 54.405538,
+          "lon": 18.779101
+        },
+        {
+          "lat": 54.402109,
+          "lon": 18.758756
+        }
+      ]
+    }
+  ]
+  

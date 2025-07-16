@@ -1,0 +1,21 @@
+[
+    {
+      "type": "marker",
+      "name": "Buoy 2",
+      "lat": 54.402200,
+      "lon": 18.75743
+    },
+    {
+      "type": "marker",
+      "name": "Buoy 1",
+      "lat": 54.393053,
+      "lon": 18.780217
+  },
+    {
+      "type": "marker",
+      "name": "Buoy 3",
+      "lat": 54.405438,
+      "lon": 18.779101
+}
+  ]
+  
