@@ -276,7 +276,7 @@ def generate_html_visualization(gpx_file, bearing_threshold=60, start_segment=No
     # Determine output file name if not specified
     if output_file is None:
         base_name = os.path.splitext(os.path.basename(gpx_file))[0]
-        output_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'output', f"{base_name}_visualization.html")
+        output_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'docs', f"{base_name}_visualization.html")
     
     # Create directory if it doesn't exist
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -835,8 +835,8 @@ def main():
     if len(sys.argv) > 5 and sys.argv[5] != "None":
         output_file = sys.argv[5]
         if not os.path.isabs(output_file):
-            # If not an absolute path, put it in the output directory
-            output_file = os.path.join(project_root, 'output', output_file)
+            # If not an absolute path, put it in the docs directory
+            output_file = os.path.join(project_root, 'docs', output_file)
     
     buoys_file = None
     if len(sys.argv) > 6 and sys.argv[6] != "None":
