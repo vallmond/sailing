@@ -70,87 +70,54 @@
         </div>
         
         <h2>Track Visualizations</h2>
-        <table>
+        <table id="track-table">
             <thead>
                 <tr>
                     <th>Date</th>
                     <th>Time</th>
-                    <th>File</th>
+                    <th>Track</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>2025-05-31</td>
-                    <td>8:31</td>
-                    <td><a href="2025-05-31-8_31_visualization.html">Regatta - Day 2 - All</a></td>
-                </tr>
-                <tr>
-                    <td>2025-06-14</td>
-                    <td>8:29</td>
-                    <td><a href="2025-06-14-8_29_visualization.html">Balts boat1</a></td>
-                </tr>
-                <tr>
-                    <td>2025-06-14</td>
-                    <td>8:34</td>
-                    <td><a href="2025-06-14-8_34_visualization.html">Balts boat2</a></td>
-                </tr>
-                <tr>
-                    <td>2025-06-21</td>
-                    <td>7:57</td>
-                    <td><a href="2025-06-21-7_57_visualization.html">Training - All</a></td>
-                </tr>
-                <tr>
-                    <td>2025-06-28</td>
-                    <td>7:29</td>
-                    <td><a href="2025-06-28-7_29_visualization.html">Training - All</a></td>
-                </tr>
-                <tr>
-                    <td>2025-06-28</td>
-                    <td>10:00</td>
-                    <td><a href="2025-06-28-10_00_visualization.html">Training - Race 1</a></td>
-                </tr>
-                <tr>
-                    <td>2025-06-28</td>
-                    <td>10:35</td>
-                    <td><a href="2025-06-28-10_35_visualization.html">Training - Race 2</a></td>
-                </tr>
-                <tr>
-                    <td>2025-06-28</td>
-                    <td>11:13</td>
-                    <td><a href="2025-06-28-11_13_visualization.html">Training - Race 3</a></td>
-                </tr>
-                <tr>
-                    <td>2025-06-28</td>
-                    <td>11:50</td>
-                    <td><a href="2025-06-28-11_50_visualization.html">Training - Race 4</a></td>
-                </tr>
-                <tr>
-                    <td>2025-06-28</td>
-                    <td>12:33</td>
-                    <td><a href="2025-06-28-12_33_visualization.html">Training - Race 5</a></td>
-                </tr>
-                <tr>
-                    <td>2025-07-04</td>
-                    <td>11:34</td>
-                    <td><a href="2025-07-04-11_34_visualization.html">Regatta – The way there</a></td>
-                </tr>
-                <tr>
-                    <td>2025-07-05</td>
-                    <td>8:47</td>
-                    <td><a href="2025-07-05-8_47_visualization.html">Regatta – All</a></td>
-                </tr>
-                <tr>
-                    <td>2025-07-05</td>
-                    <td>11:11</td>
-                    <td><a href="2025-07-05-11_11_visualization.html">Regatta – Race 1</a></td>
-                </tr>
-                <tr>
-                    <td>2025-07-05</td>
-                    <td>12:28</td>
-                    <td><a href="2025-07-05-12_28_visualization.html">Regatta – Race 2</a></td>
-                </tr>
+            <tbody id="track-list">
+                <!-- Track data will be loaded dynamically -->
             </tbody>
         </table>
+
+        <script>
+            // Load track data from JSON file
+            fetch(new URL('tracks.json', window.location.href).href)
+                .then(response => response.json())
+                .then(tracks => {
+                    const trackList = document.getElementById('track-list');
+                    
+                    // Tracks are already in reverse order in the JSON file
+                    tracks.forEach(track => {
+                        const row = document.createElement('tr');
+                        
+                        const dateCell = document.createElement('td');
+                        dateCell.textContent = track.date;
+                        row.appendChild(dateCell);
+                        
+                        const timeCell = document.createElement('td');
+                        timeCell.textContent = track.time;
+                        row.appendChild(timeCell);
+                        
+                        const linkCell = document.createElement('td');
+                        const link = document.createElement('a');
+                        link.href = track.file;
+                        link.textContent = track.title;
+                        linkCell.appendChild(link);
+                        row.appendChild(linkCell);
+                        
+                        trackList.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading track data:', error);
+                    document.getElementById('track-list').innerHTML = 
+                        '<tr><td colspan="3">Error loading track data. Please try again later.</td></tr>';
+                });
+        </script>
     </div>
     <footer>
         <p>© 2025 Dzmitry Shokel. All rights reserved.</p>
