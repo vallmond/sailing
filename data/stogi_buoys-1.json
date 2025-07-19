@@ -7,21 +7,37 @@
     },
     {
       "type": "marker",
-      "name": "Buoy 1",
-      "lat": 54.393273,
-      "lon": 18.780217
-  },
-    {
-      "type": "marker",
       "name": "Buoy 3",
       "lat": 54.405538,
       "lon": 18.779101
 },
 {
   "type": "marker",
+  "name": "Buoy 1",
+  "lat": 54.393273,
+  "lon": 18.780217
+},
+{
+  "type": "marker",
   "name": "Buoy 4",
   "lat": 54.409455,
   "lon": 18.803105
+},
+{
+  "type": "line",
+  "name": "Start Line",
+  "color": "#FF0000",
+  "width": 3,
+  "points": [
+    {
+      "lat": 54.393273,
+      "lon": 18.780217
+  },
+    {
+      "lat": 54.393733,
+      "lon": 18.780617
+  }
+  ]
 }
   ]
   
