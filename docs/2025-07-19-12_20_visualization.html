@@ -11,8 +11,17 @@
         #map { position: absolute; top: 0; bottom: 0; width: 100%; }
         .info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; }
         .info h4 { margin: 0 0 5px; color: #777; }
-        .legend { text-align: left; line-height: 18px; color: #555; }
+        .legend { text-align: left; line-height: 18px; color: #555; max-height: 500px; overflow-y: auto; transition: max-height 0.3s ease-in-out; }
         .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
+        .legend-toggle { cursor: pointer; font-weight: bold; margin-bottom: 5px; user-select: none; }
+        .legend-toggle:after { content: ' ▼'; font-size: 12px; }
+        .legend-toggle.collapsed:after { content: ' ►'; }
+        .legend-content { display: block; }
+        .legend-content.collapsed { display: none; }
+        .legend-section { margin-bottom: 10px; }
+        @media (max-width: 768px) {
+            .legend { max-width: 80%; max-height: 300px; }
+        }
         .segment-info { margin-bottom: 5px; }
         .segment-info-label { font-weight: bold; }
         hr { border: 0; height: 1px; background: #ccc; margin: 10px 0; }
@@ -364,39 +373,46 @@
     legend.onAdd = function(map) {
         const div = L.DomUtil.create('div', 'info legend');
         
+        // Add toggle button for collapsing/expanding
+        // Prepare legend content
+        let legendContent = '';
+        
+        // Add toggle button and content container
+        legendContent = '<div class="legend-toggle">Legend</div><div class="legend-content">';
+        
         // Add segment type legend
-        div.innerHTML = '<h4>Segment Types</h4>';
+        legendContent += '<h4>Segment Types</h4>';
         
         // Add legend for segment types
-        div.innerHTML += '<div><i style="background:rgb(255,0,0)"></i> Turn (even)</div>';
-        div.innerHTML += '<div><i style="background:rgb(255,100,0)"></i> Turn (odd)</div>';
+        legendContent += '<div><i style="background:rgb(255,0,0)"></i> Turn (even)</div>';
+        legendContent += '<div><i style="background:rgb(255,100,0)"></i> Turn (odd)</div>';
         
         // Add speed category legend
-        div.innerHTML += '<hr><h4>Speed Categories (Straight Segments)</h4>';
+        legendContent += '<hr><h4>Speed Categories (Straight Segments)</h4>';
         
         // Add legend for speed categories with paired colors
-        div.innerHTML += '<div><i style="background:rgb(80,200,80)"></i> Slow (even) < 4 knots</div>';
-        div.innerHTML += '<div><i style="background:rgb(220,220,60)"></i> Slow (odd) < 4 knots</div>';
-        div.innerHTML += '<div><i style="background:rgb(60,80,220)"></i> Medium (even) 4-6 knots</div>';
-        div.innerHTML += '<div><i style="background:rgb(180,60,220)"></i> Medium (odd) 4-6 knots</div>';
-        div.innerHTML += '<div><i style="background:rgb(220,60,60)"></i> Fast (even) > 6 knots</div>';
-        div.innerHTML += '<div><i style="background:rgb(240,140,40)"></i> Fast (odd) > 6 knots</div>';
+        legendContent += '<div><i style="background:rgb(80,200,80)"></i> Slow (even) < 4 knots</div>';
+        legendContent += '<div><i style="background:rgb(220,220,60)"></i> Slow (odd) < 4 knots</div>';
+        legendContent += '<div><i style="background:rgb(60,80,220)"></i> Medium (even) 4-6 knots</div>';
+        legendContent += '<div><i style="background:rgb(180,60,220)"></i> Medium (odd) 4-6 knots</div>';
+        legendContent += '<div><i style="background:rgb(220,60,60)"></i> Fast (even) > 6 knots</div>';
+        legendContent += '<div><i style="background:rgb(240,140,40)"></i> Fast (odd) > 6 knots</div>';
         
         // Add trend line legend
-        div.innerHTML += '<hr><h4>Trend Lines</h4>';
-        div.innerHTML += '<div><i style="background:black; height:2px; margin-top:8px; opacity:0.7"></i> Overall segment</div>';
-        div.innerHTML += '<div><i style="background:blue; height:2px; margin-top:8px; opacity:0.7"></i> First 10 seconds</div>';
-        div.innerHTML += '<div><i style="background:red; height:2px; margin-top:8px; opacity:0.7"></i> Last 10 seconds</div>';
+        legendContent += '<hr><h4>Trend Lines</h4>';
+        legendContent += '<div><i style="background:black; height:2px; margin-top:8px; opacity:0.7"></i> Overall segment</div>';
+        legendContent += '<div><i style="background:blue; height:2px; margin-top:8px; opacity:0.7"></i> First 10 seconds</div>';
+        legendContent += '<div><i style="background:red; height:2px; margin-top:8px; opacity:0.7"></i> Last 10 seconds</div>';
         
         // Add tack points legend
-        div.innerHTML += '<hr><h4>Tack Points</h4>';
-        div.innerHTML += '<div><i style="background:gray; width:6px; height:6px; border-radius:50%; display:inline-block"></i> Potential Tack</div>';
-        div.innerHTML += '<div><i style="background:yellow; width:8px; height:8px; border-radius:50%; display:inline-block"></i> Valid Tack (>10s)</div>';
-        div.innerHTML += '<div><i style="background:green; width:10px; height:10px; border-radius:50%; display:inline-block"></i> Used for Wind Direction</div>';
+        legendContent += '<hr><h4>Tack Points</h4>';
+        legendContent += '<div><i style="background:gray; width:6px; height:6px; border-radius:50%; display:inline-block"></i> Potential Tack</div>';
+        legendContent += '<div><i style="background:yellow; width:8px; height:8px; border-radius:50%; display:inline-block"></i> Valid Tack (>10s)</div>';
+        legendContent += '<div><i style="background:green; width:10px; height:10px; border-radius:50%; display:inline-block"></i> Used for Wind Direction</div>';
         
         // Add course markers legend if present
         if (trackData.buoys && trackData.buoys.length > 0) {
-            div.innerHTML += '<hr><h4>Course Markers</h4>';
+            legendContent += '<hr><h4>Course Markers</h4>';
             
             // Check for marker types present in the data
             const hasMarkers = trackData.buoys.some(b => !b.type || b.type === 'marker');
@@ -405,20 +421,20 @@
             
             // Add legend items for each type present
             if (hasMarkers) {
-                div.innerHTML += '<div><i style="background:red; width:10px; height:10px; border-radius:50%; border:1px solid white; display:inline-block; color:white; text-align:center; font-weight:bold; font-size:8px;">B</i> Buoy</div>';
+                legendContent += '<div><i style="background:red; width:10px; height:10px; border-radius:50%; border:1px solid white; display:inline-block; color:white; text-align:center; font-weight:bold; font-size:8px;">B</i> Buoy</div>';
             }
             
             if (hasLines) {
-                div.innerHTML += '<div><i style="background:red; width:15px; height:3px; display:inline-block;"></i> Line</div>';
+                legendContent += '<div><i style="background:red; width:15px; height:3px; display:inline-block;"></i> Line</div>';
             }
             
             if (hasPolygons) {
-                div.innerHTML += '<div><i style="background:rgba(0,0,255,0.1); border:2px solid blue; width:15px; height:10px; display:inline-block;"></i> Area</div>';
+                legendContent += '<div><i style="background:rgba(0,0,255,0.1); border:2px solid blue; width:15px; height:10px; display:inline-block;"></i> Area</div>';
             }
         }
         
         // Add segment count info
-        div.innerHTML += '<hr><h4>Segment Stats</h4>';
+        legendContent += '<hr><h4>Segment Stats</h4>';
         
         // Count segments by type
         const typeCounts = {
@@ -426,9 +442,9 @@
             straight: trackData.segments.filter(s => s.segment_type === 'straight').length
         };
         
-        div.innerHTML += '<div><b>By Type:</b></div>';
-        div.innerHTML += '<div>Turn: ' + typeCounts.turn + '</div>';
-        div.innerHTML += '<div>Straight: ' + typeCounts.straight + '</div>';
+        legendContent += '<div><b>By Type:</b></div>';
+        legendContent += '<div>Turn: ' + typeCounts.turn + '</div>';
+        legendContent += '<div>Straight: ' + typeCounts.straight + '</div>';
         
         // Count segments by speed category
         const speedCounts = {
@@ -437,11 +453,11 @@
             fast: trackData.segments.filter(s => s.metrics.speed_category === 'fast').length
         };
         
-        div.innerHTML += '<div><b>By Speed:</b></div>';
-        div.innerHTML += '<div>Slow: ' + speedCounts.slow + '</div>';
-        div.innerHTML += '<div>Medium: ' + speedCounts.medium + '</div>';
-        div.innerHTML += '<div>Fast: ' + speedCounts.fast + '</div>';
-        div.innerHTML += '<b>Total: ' + trackData.length + '</b>';
+        legendContent += '<div><b>By Speed:</b></div>';
+        legendContent += '<div>Slow: ' + speedCounts.slow + '</div>';
+        legendContent += '<div>Medium: ' + speedCounts.medium + '</div>';
+        legendContent += '<div>Fast: ' + speedCounts.fast + '</div>';
+        legendContent += '<b>Total: ' + trackData.length + '</b>';
         
         // Add tack distribution if wind direction is available
         if (trackData.length > 0 && trackData[0].metrics.wind_direction !== undefined) {
@@ -451,11 +467,11 @@
                 mixed: trackData.filter(s => s.metrics.dominant_tack === 'mixed').length
             };
             
-            div.innerHTML += '<hr><h4>Tack Distribution</h4>';
-            div.innerHTML += '<div>Port: ' + tackCounts.port + '</div>';
-            div.innerHTML += '<div>Starboard: ' + tackCounts.starboard + '</div>';
+            legendContent += '<hr><h4>Tack Distribution</h4>';
+            legendContent += '<div>Port: ' + tackCounts.port + '</div>';
+            legendContent += '<div>Starboard: ' + tackCounts.starboard + '</div>';
             if (tackCounts.mixed > 0) {
-                div.innerHTML += '<div>Mixed: ' + tackCounts.mixed + '</div>';
+                legendContent += '<div>Mixed: ' + tackCounts.mixed + '</div>';
             }
             
             // Add point of sail distribution
@@ -469,13 +485,51 @@
                 'Unknown': trackData.filter(s => s.metrics.point_of_sail === 'Unknown').length
             };
             
-            div.innerHTML += '<hr><h4>Points of Sail</h4>';
+            legendContent += '<hr><h4>Points of Sail</h4>';
             for (const [sail, count] of Object.entries(pointOfSailCounts)) {
                 if (count > 0) {
-                    div.innerHTML += `<div>${sail}: ${count}</div>`;
+                    legendContent += `<div>${sail}: ${count}</div>`;
                 }
             }
         }
+        
+        // Close the legend-content div
+        legendContent += '</div>';
+        
+        // Set the entire content at once
+        div.innerHTML = legendContent;
+        
+        // Add click event listener for toggle
+        const toggle = div.querySelector('.legend-toggle');
+        const content = div.querySelector('.legend-content');
+        
+        // Initialize with expanded state
+        toggle.classList.remove('collapsed');
+        content.classList.remove('collapsed');
+        
+        // Function to toggle legend visibility
+        function toggleLegend() {
+            toggle.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+        
+        // Add click event listener
+        toggle.addEventListener('click', function(e) {
+            // Stop propagation to prevent map click
+            e.stopPropagation();
+            e.preventDefault();
+            toggleLegend();
+        });
+        
+        // Also use Leaflet's event handling for compatibility
+        L.DomEvent.on(toggle, 'click', function(e) {
+            L.DomEvent.stopPropagation(e);
+            L.DomEvent.preventDefault(e);
+        });
+        
+        // Prevent map click events when interacting with the legend
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.disableScrollPropagation(div);
         
         return div;
     };

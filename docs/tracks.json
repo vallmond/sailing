@@ -1,26 +1,28 @@
 [
   {
     "date": "2025-07-19",
-    "time": "9:58",
-    "file": "2025-07-19-9_58_visualization.html",
-    "title": "Training - All"
-  },
-  {
-    "date": "2025-07-19",
-    "time": "11:04",
-    "file": "2025-07-19-11_04_visualization.html",
-    "title": "Training - All"
-  },
-  {
+    "time": "12:20",
+    "file": "2025-07-19-12_20_visualization.html",
+    "title": "Training - race4 'medium genua + spinaker'"
+  },{
     "date": "2025-07-19",
     "time": "11:41",
     "file": "2025-07-19-11_41_visualization.html",
-    "title": "Training - All"
-  },
-  {
+    "title": "Training - race3 'medium genua'"
+  },{
     "date": "2025-07-19",
-    "time": "12:20",
-    "file": "2025-07-19-12_20_visualization.html",
+    "time": "11:04",
+    "file": "2025-07-19-11_04_visualization.html",
+    "title": "Training - race2 'staksel'"
+  },{
+    "date": "2025-07-19",
+    "time": "10:31",
+    "file": "2025-07-19-10_31_visualization.html",
+    "title": "Training - race1 'big genua'"
+  },{
+    "date": "2025-07-19",
+    "time": "9:58",
+    "file": "2025-07-19-9_58_visualization.html",
     "title": "Training - All"
   },
   {
