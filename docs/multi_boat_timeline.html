@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Boat Timeline – 26 Oct 2025</title>
+    <link rel="icon" type="image/svg+xml" href="assets/north-star.svg">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -132,6 +133,9 @@
             box-shadow: 0 20px 45px rgba(15, 23, 42, 0.55);
             backdrop-filter: blur(16px);
             z-index: 1300;
+            pointer-events: auto;
+            max-height: 60vh;
+            overflow-y: auto;
         }
 
         .map-wrapper.fullscreen + .timeline-panel label,
@@ -162,12 +166,73 @@
             box-shadow: none;
         }
 
+        .map-wrapper.fullscreen + .timeline-panel.collapsed {
+            width: auto;
+            max-width: calc(100vw - 2rem);
+            padding: 0.85rem 1.1rem;
+            bottom: 1rem;
+            left: auto;
+            right: 1rem;
+            transform: none;
+            pointer-events: none;
+        }
+
+        .map-wrapper.fullscreen + .timeline-panel.collapsed .controls-toggle {
+            background: rgba(14, 165, 233, 0.85);
+            box-shadow: none;
+            pointer-events: auto;
+        }
+
         .panel {
             background: var(--panel);
             border-radius: 18px;
             padding: clamp(1rem, 2.5vw, 1.5rem);
             border: 1px solid var(--border);
             box-shadow: 0 18px 36px rgba(15, 23, 42, 0.06);
+        }
+
+        .timeline-panel .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .timeline-panel .panel-header h2 {
+            margin: 0;
+        }
+
+        .controls-toggle {
+            background: #0ea5e9;
+            color: #f8fafc;
+            border: none;
+            border-radius: 999px;
+            padding: 0.4rem 1rem;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: transform 120ms ease, box-shadow 120ms ease;
+            box-shadow: 0 12px 24px rgba(14, 165, 233, 0.35);
+        }
+
+        .controls-toggle:active {
+            transform: translateY(1px);
+            box-shadow: 0 8px 18px rgba(14, 165, 233, 0.25);
+        }
+
+        .timeline-panel.collapsed .panel-body {
+            display: none;
+        }
+
+        .timeline-panel.collapsed {
+            padding-bottom: 0.85rem;
+        }
+
+        .timeline-panel.collapsed .panel-header {
+            margin-bottom: 0;
         }
 
         .panel h2 {
@@ -435,6 +500,17 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+
+            .map-wrapper.fullscreen + .timeline-panel {
+                width: calc(100vw - 1.5rem);
+                bottom: 1rem;
+                max-height: 55vh;
+            }
+
+            .map-wrapper.fullscreen + .timeline-panel.collapsed {
+                right: 0.75rem;
+                bottom: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -450,35 +526,40 @@
         </div>
 
         <section class="panel timeline-panel" aria-labelledby="timeline-controls">
-            <h2 id="timeline-controls">Timeline Controls</h2>
-            <div class="controls">
-                <button id="play-toggle" type="button">Play</button>
-                <button id="reset-timeline" type="button" class="secondary">Reset</button>
-                <div class="slider">
-                    <label for="timeline-slider">Timeline</label>
-                    <input id="timeline-slider" type="range" min="0" max="1000" value="0" step="1">
-                </div>
-                <div class="slider" style="max-width: 160px;">
-                    <label for="speed-input">Playback Speed (×)</label>
-                    <input id="speed-input" type="number" min="0.1" max="30" step="0.1" value="30.0">
-                </div>
+            <div class="panel-header">
+                <h2 id="timeline-controls">Timeline Controls</h2>
+                <button id="controls-toggle" type="button" class="controls-toggle" aria-controls="timeline-controls-body">Hide Controls</button>
             </div>
-            <div class="time-readout">
-                <div><strong id="current-time">--:--</strong> current selection</div>
-                <div>Range <span id="range-start">--</span> → <span id="range-end">--</span></div>
-                <div>Total span <span id="range-duration">--</span></div>
-            </div>
-            <div class="window-controls">
-                <div class="field">
-                    <label for="window-start">Window Start</label>
-                    <input id="window-start" type="time" step="1">
+            <div class="panel-body" id="timeline-controls-body">
+                <div class="controls">
+                    <button id="play-toggle" type="button">Play</button>
+                    <button id="reset-timeline" type="button" class="secondary">Reset</button>
+                    <div class="slider">
+                        <label for="timeline-slider">Timeline</label>
+                        <input id="timeline-slider" type="range" min="0" max="1000" value="0" step="1">
+                    </div>
+                    <div class="slider" style="max-width: 160px;">
+                        <label for="speed-input">Playback Speed (×)</label>
+                        <input id="speed-input" type="number" min="0.1" max="30" step="0.1" value="30.0">
+                    </div>
                 </div>
-                <div class="field">
-                    <label for="window-end">Window End</label>
-                    <input id="window-end" type="time" step="1">
+                <div class="time-readout">
+                    <div><strong id="current-time">--:--</strong> current selection</div>
+                    <div>Range <span id="range-start">--</span> → <span id="range-end">--</span></div>
+                    <div>Total span <span id="range-duration">--</span></div>
                 </div>
-                <button id="apply-window" type="button">Apply Window</button>
-                <button id="reset-window" type="button" class="secondary">Reset Window</button>
+                <div class="window-controls">
+                    <div class="field">
+                        <label for="window-start">Window Start</label>
+                        <input id="window-start" type="time" step="1">
+                    </div>
+                    <div class="field">
+                        <label for="window-end">Window End</label>
+                        <input id="window-end" type="time" step="1">
+                    </div>
+                    <button id="apply-window" type="button">Apply Window</button>
+                    <button id="reset-window" type="button" class="secondary">Reset Window</button>
+                </div>
             </div>
         </section>
 
@@ -541,6 +622,10 @@
         const windowEndInput = document.getElementById('window-end');
         const applyWindowButton = document.getElementById('apply-window');
         const resetWindowButton = document.getElementById('reset-window');
+        const urlParams = new URLSearchParams(window.location.search);
+        const timelinePanel = document.querySelector('.timeline-panel');
+        const controlsToggle = document.getElementById('controls-toggle');
+        const smallScreenQuery = window.matchMedia('(max-width: 720px)');
 
         const currentTimeEl = document.getElementById('current-time');
         const rangeStartEl = document.getElementById('range-start');
@@ -560,6 +645,8 @@
         let windowStart = null;
         let windowEnd = null;
         let sliderFraction = 0;
+        let controlsCollapsed = false;
+        let collapsedBeforeFullscreen = controlsCollapsed;
 
         function pad(value) {
             return String(value).padStart(2, '0');
@@ -604,6 +691,94 @@
             rangeDurationEl.textContent = formatDuration(windowEnd.getTime() - windowStart.getTime());
             windowStartInput.value = toTimeInputValue(windowStart);
             windowEndInput.value = toTimeInputValue(windowEnd);
+        }
+
+        function setControlsCollapsed(collapsed) {
+            controlsCollapsed = collapsed;
+            if (timelinePanel) {
+                timelinePanel.classList.toggle('collapsed', collapsed);
+            }
+            if (controlsToggle) {
+                controlsToggle.textContent = collapsed ? 'Show Controls' : 'Hide Controls';
+                controlsToggle.setAttribute('aria-expanded', (!collapsed).toString());
+            }
+        }
+
+        function normalizeTimeString(value) {
+            const trimmed = value.trim();
+            if (/^\d{4}$/.test(trimmed)) {
+                return `${trimmed.slice(0, 2)}:${trimmed.slice(2)}`;
+            }
+            if (/^\d{6}$/.test(trimmed)) {
+                return `${trimmed.slice(0, 2)}:${trimmed.slice(2, 4)}:${trimmed.slice(4)}`;
+            }
+            return trimmed;
+        }
+
+        function parseWindowParam(rawValue) {
+            if (!rawValue) return null;
+            const trimmed = rawValue.trim();
+            if (!trimmed) return null;
+
+            if (/^\d+(?:\.\d+)?$/.test(trimmed)) {
+                const seconds = parseFloat(trimmed);
+                if (!Number.isNaN(seconds)) {
+                    return new Date(globalStart.getTime() + seconds * 1000);
+                }
+            }
+
+            const isoCandidate = new Date(trimmed);
+            if (!Number.isNaN(isoCandidate.getTime())) {
+                return isoCandidate;
+            }
+
+            return fromTimeInputValue(normalizeTimeString(trimmed), globalStart);
+        }
+
+        function parseDurationParam(rawValue) {
+            if (!rawValue) return null;
+            const trimmed = rawValue.trim().toLowerCase();
+            if (!trimmed) return null;
+
+            if (/^\d+(?:\.\d+)?$/.test(trimmed)) {
+                return parseFloat(trimmed) * 1000;
+            }
+
+            let totalMs = 0;
+            let matched = false;
+            const unitRegex = /(\d+(?:\.\d+)?)([hms])/g;
+            unitRegex.lastIndex = 0;
+            let unitMatch;
+            while ((unitMatch = unitRegex.exec(trimmed)) !== null) {
+                matched = true;
+                const value = parseFloat(unitMatch[1]);
+                const unit = unitMatch[2];
+                if (Number.isNaN(value)) continue;
+                if (unit === 'h') totalMs += value * 3600000;
+                else if (unit === 'm') totalMs += value * 60000;
+                else totalMs += value * 1000;
+            }
+            if (matched && totalMs > 0) {
+                return totalMs;
+            }
+
+            const parts = trimmed.split(':').map(part => part.trim()).filter(Boolean);
+            if (parts.length) {
+                const numbers = parts.map(Number);
+                if (numbers.every(num => !Number.isNaN(num))) {
+                    if (numbers.length === 3) {
+                        return ((numbers[0] * 3600) + (numbers[1] * 60) + numbers[2]) * 1000;
+                    }
+                    if (numbers.length === 2) {
+                        return ((numbers[0] * 60) + numbers[1]) * 1000;
+                    }
+                    if (numbers.length === 1) {
+                        return numbers[0] * 1000;
+                    }
+                }
+            }
+
+            return null;
         }
 
         function decodeBase64ToText(value) {
@@ -896,6 +1071,74 @@
             });
         }
 
+        function applyInitialWindowFromParams() {
+            const startParam = urlParams.get('windowStart') ?? urlParams.get('start');
+            const endParam = urlParams.get('windowEnd') ?? urlParams.get('end');
+            const durationParam = urlParams.get('windowDuration') ?? urlParams.get('duration');
+            const speedParam = urlParams.get('speed');
+
+            let desiredStart = windowStart;
+            let desiredEnd = windowEnd;
+            let hasOverride = false;
+
+            if (startParam) {
+                const parsed = parseWindowParam(startParam);
+                if (parsed && !Number.isNaN(parsed.getTime())) {
+                    desiredStart = parsed;
+                    hasOverride = true;
+                }
+            }
+
+            if (endParam) {
+                const parsed = parseWindowParam(endParam);
+                if (parsed && !Number.isNaN(parsed.getTime())) {
+                    desiredEnd = parsed;
+                    hasOverride = true;
+                }
+            }
+
+            if (durationParam) {
+                const durationMs = parseDurationParam(durationParam);
+                if (Number.isFinite(durationMs) && durationMs > 0) {
+                    if (startParam && !endParam) {
+                        desiredEnd = new Date(desiredStart.getTime() + durationMs);
+                        hasOverride = true;
+                    } else if (!startParam && endParam) {
+                        desiredStart = new Date(desiredEnd.getTime() - durationMs);
+                        hasOverride = true;
+                    } else if (!startParam && !endParam) {
+                        desiredStart = new Date(globalStart.getTime());
+                        desiredEnd = new Date(desiredStart.getTime() + durationMs);
+                        hasOverride = true;
+                    }
+                }
+            }
+
+            // Clamp to available range
+            if (desiredStart < globalStart) desiredStart = new Date(globalStart.getTime());
+            if (desiredEnd > globalEnd) desiredEnd = new Date(globalEnd.getTime());
+            if (desiredEnd <= desiredStart) {
+                desiredStart = new Date(globalStart.getTime());
+                desiredEnd = new Date(globalEnd.getTime());
+            }
+
+            windowStart = desiredStart;
+            windowEnd = desiredEnd;
+            timelineSlider.value = 0;
+            updateWindowSummary();
+            updateTrackSegmentsForWindow();
+            setTimelinePosition(0);
+
+            if (speedParam) {
+                const parsedSpeed = parseFloat(speedParam);
+                if (!Number.isNaN(parsedSpeed) && parsedSpeed > 0 && parsedSpeed <= 30) {
+                    speedInput.value = parsedSpeed.toString();
+                }
+            }
+
+            return hasOverride;
+        }
+
         async function boot() {
             try {
                 const loadedTracks = await Promise.all(TRACK_CONFIG.map(loadGPXTrack));
@@ -927,8 +1170,7 @@
                 });
 
                 updateTimelineRanges();
-                updateTrackSegmentsForWindow();
-                setTimelinePosition(0);
+                applyInitialWindowFromParams();
 
                 timelineSlider.addEventListener('input', event => {
                     const fraction = parseInt(event.target.value, 10) / 1000;
@@ -989,10 +1231,45 @@
                     setTimelinePosition(0);
                 });
 
+                setControlsCollapsed(controlsCollapsed);
+                collapsedBeforeFullscreen = controlsCollapsed;
+
+                if (controlsToggle) {
+                    controlsToggle.addEventListener('click', () => {
+                        setControlsCollapsed(!controlsCollapsed);
+                    });
+                }
+
+                const handleScreenChange = event => {
+                    if (!mapWrapper.classList.contains('fullscreen')) {
+                        return;
+                    }
+
+                    if (event.matches) {
+                        setControlsCollapsed(true);
+                    } else {
+                        setControlsCollapsed(collapsedBeforeFullscreen);
+                    }
+                };
+
+                if (typeof smallScreenQuery.addEventListener === 'function') {
+                    smallScreenQuery.addEventListener('change', handleScreenChange);
+                } else if (typeof smallScreenQuery.addListener === 'function') {
+                    smallScreenQuery.addListener(handleScreenChange);
+                }
+
                 mapToggle.addEventListener('click', () => {
                     const isFull = mapWrapper.classList.toggle('fullscreen');
                     document.body.classList.toggle('fullscreen-active', isFull);
                     mapToggle.textContent = isFull ? 'Exit Fullscreen' : 'Enter Fullscreen';
+                    if (isFull) {
+                        collapsedBeforeFullscreen = controlsCollapsed;
+                        if (smallScreenQuery.matches) {
+                            setControlsCollapsed(true);
+                        }
+                    } else {
+                        setControlsCollapsed(collapsedBeforeFullscreen);
+                    }
                     setTimeout(() => map.invalidateSize(), 140);
                 });
 

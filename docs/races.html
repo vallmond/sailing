@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regatta Race Sessions</title>
+    <link rel="icon" type="image/svg+xml" href="assets/north-star.svg">
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f4f6fb;
+            --card: #ffffff;
+            --primary: #2563eb;
+            --accent: #0ea5e9;
+            --text: #111827;
+            --muted: #4b5563;
+            --border: #d8e0f2;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: linear-gradient(180deg, rgba(219, 234, 254, 0.45) 0%, rgba(244, 246, 251, 1) 38%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 2.75rem clamp(1.5rem, 4vw, 4rem) 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 0.75rem;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            margin: 0 auto;
+            max-width: 60ch;
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        main {
+            flex: 1;
+            padding: 0 clamp(1rem, 4vw, 3rem) 3rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            max-width: 1080px;
+            margin: 0 auto;
+        }
+
+        .card {
+            position: relative;
+            background: var(--card);
+            border-radius: 22px;
+            padding: 1.75rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 40px rgba(37, 99, 235, 0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: transform 150ms ease, box-shadow 150ms ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 32px 54px rgba(37, 99, 235, 0.16);
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            align-self: flex-start;
+            padding: 0.3rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .time-window {
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .actions {
+            margin-top: auto;
+            display: flex;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .actions a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1.35rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            transition: transform 120ms ease, box-shadow 120ms ease;
+        }
+
+        .actions a.primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            box-shadow: 0 20px 36px rgba(37, 99, 235, 0.35);
+        }
+
+        .actions a.secondary {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .actions a:hover {
+            transform: translateY(-1px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem 1rem 2.5rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 640px) {
+            header {
+                padding-top: 2.2rem;
+            }
+
+            .card {
+                padding: 1.4rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .actions a {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Regatta Sessions – Oct&nbsp;26</h1>
+        <p>Jump straight into four curated playback windows that carry you through the race day finish at 13:31. Each session links to the multi-boat visualizer with a pre-set time span so you can review the action instantly.</p>
+    </header>
+    <main>
+        <div class="grid">
+            <article class="card">
+                <span class="tag">Overview</span>
+                <h2>Full Day Test Run</h2>
+                <p>The complete timeline for both boats. Use this version when you want to scrub freely across the entire recording or discover new segments worth bookmarking.</p>
+                <div class="actions">
+                    <a class="primary" href="multi_boat_timeline.html" target="_blank" rel="noopener">Open Timeline</a>
+                    <a class="secondary" href="multi_boat_timeline.html" target="_blank" rel="noopener">Preview</a>
+                </div>
+            </article>
+
+            <article class="card">
+                <span class="tag">Session 1</span>
+                <h2>Race Start Push</h2>
+                <p>Focused on the opening duel from <span class="time-window">10:23 – 11:05</span>. Ideal for analysing the acceleration phase, lane holding, and first cross tactics.</p>
+                <div class="actions">
+                    <a class="primary" href="multi_boat_timeline.html?windowStart=10:23&windowEnd=11:05" target="_blank" rel="noopener">View Session</a>
+                    <a class="secondary" href="multi_boat_timeline.html?windowStart=10:23&windowEnd=11:05&speed=15" target="_blank" rel="noopener">Quick Replay</a>
+                </div>
+            </article>
+
+            <article class="card">
+                <span class="tag">Session 2</span>
+                <h2>Midday Upwind Beat</h2>
+                <p>Captures the sustained upwind leg between <span class="time-window">11:10 – 11:55</span>. Use it to compare VMG, lane discipline, and mark approach angles.</p>
+                <div class="actions">
+                    <a class="primary" href="multi_boat_timeline.html?windowStart=11:10&windowEnd=11:55" target="_blank" rel="noopener">View Session</a>
+                    <a class="secondary" href="multi_boat_timeline.html?windowStart=11:10&windowEnd=11:55&speed=20" target="_blank" rel="noopener">Fast Replay</a>
+                </div>
+            </article>
+
+            <article class="card">
+                <span class="tag">Session 3</span>
+                <h2>Downwind Drag Race</h2>
+                <p>A high-speed reach and run window from <span class="time-window">12:05 – 12:44</span>. Great for spotting sail trim differences and gybe execution.</p>
+                <div class="actions">
+                    <a class="primary" href="multi_boat_timeline.html?windowStart=12:05&windowEnd=12:44" target="_blank" rel="noopener">View Session</a>
+                    <a class="secondary" href="multi_boat_timeline.html?windowStart=12:05&windowEnd=12:44&speed=18" target="_blank" rel="noopener">Fast Replay</a>
+                </div>
+            </article>
+
+            <article class="card">
+                <span class="tag">Session 4</span>
+                <h2>Final Approach &amp; Finish</h2>
+                <p>Final exchanges and finish approach between <span class="time-window">12:53 – 13:31</span>. Review the decisive gybes, layline calls, and the run into the finish.</p>
+                <div class="actions">
+                    <a class="primary" href="multi_boat_timeline.html?windowStart=12:53&windowEnd=13:31" target="_blank" rel="noopener">View Session</a>
+                    <a class="secondary" href="multi_boat_timeline.html?windowStart=12:53&windowEnd=13:31&speed=12" target="_blank" rel="noopener">Fast Replay</a>
+                </div>
+            </article>
+        </div>
+    </main>
+    <footer>
+        Need another custom range? Open the full day session and use the timeline controls to create a new bookmark.
+    </footer>
+</body>
+</html>
