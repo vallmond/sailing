@@ -600,21 +600,21 @@
         const TRACK_CONFIG = [
             {
                 id: 'rerata',
-                name: 'Rerata',
+                name: 'Olimpia 1',
                 color: '#f97316',
                 gpxPath: './data/rerata_26_oct.gpx',
                 inlineId: 'rerata'
             },
             {
                 id: 'boat_two',
-                name: 'Boat Two',
+                name: 'Olimpia 5',
                 color: '#6366f1',
                 gpxPath: './data/2025-10-26-8_43.gpx',
                 inlineId: 'boat_two'
             },
             {
                 id: 'boat_three',
-                name: 'Boat Three',
+                name: 'Olimpia 2',
                 color: '#22c55e',
                 gpxPath: './data/2025-10-26-boat_three.gpx',
                 inlineId: 'boat_three'
@@ -654,6 +654,32 @@
         const axisEndEl = document.getElementById('axis-end');
         const timelineRowsEl = document.getElementById('timeline-rows');
         const boatStatusEl = document.getElementById('boat-status');
+
+        const ACTIVE_TRACK_CONFIG = (() => {
+            const boatsParam = urlParams.get('boats');
+            if (!boatsParam) {
+                return TRACK_CONFIG;
+            }
+
+            const requestedIds = boatsParam
+                .split(',')
+                .map(value => value.trim())
+                .filter(Boolean);
+
+            if (!requestedIds.length) {
+                return TRACK_CONFIG;
+            }
+
+            const requestedSet = new Set(requestedIds);
+            const filtered = TRACK_CONFIG.filter(config => requestedSet.has(config.id));
+
+            if (!filtered.length) {
+                console.warn('No tracks matched requested boats parameter; loading all tracks instead.');
+                return TRACK_CONFIG;
+            }
+
+            return filtered;
+        })();
 
         const TRACKS = [];
         let globalStart = null;
@@ -1081,9 +1107,19 @@
         function updateTrackSegmentsForWindow() {
             TRACKS.forEach(track => {
                 if (!track.polyline) return;
+                const hasOverlap = windowEnd >= track.startTime && windowStart <= track.endTime;
                 const segmentPoints = track.points.filter(pt => pt.time >= windowStart && pt.time <= windowEnd);
+
+                if (!hasOverlap) {
+                    track.polyline.setLatLngs([]);
+                    return;
+                }
+
                 if (segmentPoints.length >= 2) {
                     track.polyline.setLatLngs(segmentPoints.map(pt => [pt.lat, pt.lon]));
+                } else if (segmentPoints.length === 1) {
+                    const only = [segmentPoints[0].lat, segmentPoints[0].lon];
+                    track.polyline.setLatLngs([only, only]);
                 } else {
                     track.polyline.setLatLngs(track.fullLatLngs);
                 }
@@ -1160,7 +1196,7 @@
 
         async function boot() {
             try {
-                const loadedTracks = await Promise.all(TRACK_CONFIG.map(loadGPXTrack));
+                const loadedTracks = await Promise.all(ACTIVE_TRACK_CONFIG.map(loadGPXTrack));
 
                 const bounds = L.latLngBounds([]);
                 loadedTracks.forEach(track => {
