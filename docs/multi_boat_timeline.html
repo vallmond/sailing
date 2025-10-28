@@ -529,7 +529,7 @@
 <body>
     <header>
         <h1>Regatta Timeline &amp; Boat Comparison</h1>
-        <p>Overlay two GPX recordings from 26 Oct 2025 to compare positions along a unified timeline. Use the controls to scrub or play through the day and watch each boat update in real time.</p>
+        <p>Overlay three GPX recordings from 26 Oct 2025 to compare positions along a unified timeline. Use the controls to scrub or play through the day and watch each boat update in real time.</p>
     </header>
     <main>
         <div class="map-wrapper" id="map-wrapper">
@@ -592,7 +592,7 @@
         </section>
     </main>
     <footer>
-        Built with Leaflet &middot; Tracks from <code>data/rerata_26_oct.gpx</code> and <code>data/2025-10-26-8_43.gpx</code>
+        Built with Leaflet &middot; Tracks from <code>data/rerata_26_oct.gpx</code>, <code>data/2025-10-26-8_43.gpx</code>, and <code>data/2025-10-26-boat_three.gpx</code>
     </footer>
 
     <script src="./data/track-inline-data.js"></script>
@@ -611,6 +611,13 @@
                 color: '#6366f1',
                 gpxPath: './data/2025-10-26-8_43.gpx',
                 inlineId: 'boat_two'
+            },
+            {
+                id: 'boat_three',
+                name: 'Boat Three',
+                color: '#22c55e',
+                gpxPath: './data/2025-10-26-boat_three.gpx',
+                inlineId: 'boat_three'
             }
         ];
 
