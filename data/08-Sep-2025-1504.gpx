@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="Open GPX Tracker for iOS">
+	<trk>
+		<trkseg>
+			<trkpt lat="54.39730173368953" lon="18.60419402298639">
+				<ele>9.332391067643847</ele>
+				<time>2025-09-08T13:04:33Z</time>
+			</trkpt>
+		</trkseg>
+	</trk>
+</gpx>

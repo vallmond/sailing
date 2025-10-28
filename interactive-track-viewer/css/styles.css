@@ -1,0 +1,272 @@
+/* Main layout */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.sidebar {
+    width: 350px;
+    height: 100%;
+    padding: 20px;
+    background-color: #f5f5f5;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+#map {
+    flex: 1;
+    height: 100%;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+h2 {
+    font-size: 18px;
+    margin: 15px 0 10px;
+    color: #2c3e50;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+h3 {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #2c3e50;
+}
+
+/* Input sections */
+.file-inputs, .time-controls, .metrics, .display-options {
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+input[type="file"], input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Info icon and tooltip */
+.info-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: #3498db;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+.tooltip {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    width: 300px;
+    max-width: 90%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    font-size: 12px;
+    margin-top: 5px;
+    right: 10px;
+}
+
+.tooltip h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.tooltip pre {
+    background-color: #f5f5f5;
+    padding: 8px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 0;
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+
+.tooltip.visible {
+    display: block;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+#load-data {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Time slider */
+#time-slider-range {
+    margin: 15px 0;
+}
+
+.time-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.playback-controls {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+#play-pause {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+
+.play-icon {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 7px 0 7px 14px;
+    border-color: transparent transparent transparent #ffffff;
+    margin-left: 3px;
+}
+
+.pause-icon {
+    width: 14px;
+    height: 14px;
+    border-style: double;
+    border-width: 0 0 0 10px;
+    border-color: #ffffff;
+}
+
+#playback-speed {
+    flex: 1;
+    margin-right: 10px;
+}
+
+/* Metrics */
+.metric-group {
+    background-color: white;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.metric {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.metric-label {
+    font-weight: 500;
+}
+
+.wind-rose {
+    height: 150px;
+    margin-top: 10px;
+}
+
+/* Display options */
+.option-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.option-group label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.option-group input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+/* Map customizations */
+.leaflet-popup-content {
+    font-size: 14px;
+}
+
+.leaflet-popup-content table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.leaflet-popup-content th, .leaflet-popup-content td {
+    padding: 5px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+    }
+    
+    #map {
+        height: 50vh;
+    }
+}

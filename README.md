@@ -69,7 +69,7 @@ are_similar = is_similar_bearing(bearing1, bearing2, threshold=20)
   - `generate_track_html.py` - Script to generate interactive HTML visualizations
   - `track_visualizer.py` - Alternative visualization using Python's turtle module (requires tkinter)
 - `/data/` - GPX track files
-- `/output/` - Generated HTML visualizations
+- `/docs/` - Generated HTML visualizations
 - `*.md` - Documentation files
 
 ## Visualization Features

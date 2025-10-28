@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Boat Timeline – 26 Oct 2025</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            color-scheme: light;
+            --background: #f5f7fa;
+            --panel: #ffffff;
+            --border: #d9dde7;
+            --accent: #1d72f3;
+            --text: #1f2933;
+            --muted: #52606d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 1.5rem clamp(1rem, 4vw, 2.5rem);
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header h1 {
+            margin: 0 0 0.35rem;
+            font-size: clamp(1.4rem, 2.3vw, 2rem);
+            font-weight: 600;
+        }
+
+        header p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.75);
+            max-width: 55ch;
+            line-height: 1.5;
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            gap: clamp(1rem, 3vw, 1.6rem);
+            padding: clamp(1rem, 3vw, 2rem);
+        }
+
+        #map {
+            width: 100%;
+            height: min(65vh, 520px);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+        }
+
+        .panel {
+            background: var(--panel);
+            border-radius: 18px;
+            padding: clamp(1rem, 2.5vw, 1.5rem);
+            border: 1px solid var(--border);
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.06);
+        }
+
+        .panel h2 {
+            margin: 0 0 0.75rem;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .controls button,
+        .controls input[type="range"],
+        .controls input[type="number"],
+        .window-controls button,
+        .window-controls input[type="time"] {
+            font: inherit;
+        }
+
+        .controls button,
+        .window-controls button {
+            padding: 0.6rem 1.4rem;
+            border-radius: 999px;
+            border: none;
+            background: #0ea5e9;
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            box-shadow: 0 14px 24px rgba(14, 165, 233, 0.32);
+            cursor: pointer;
+            transition: transform 120ms ease, box-shadow 120ms ease;
+        }
+
+        .controls button.secondary,
+        .window-controls button.secondary {
+            background: #e2e8f0;
+            color: #0f172a;
+            box-shadow: none;
+        }
+
+        .controls button:active {
+            transform: translateY(1px);
+        }
+
+        .controls .slider {
+            flex: 1 1 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .controls label {
+            font-size: 0.85rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+        }
+
+        .controls input[type="range"] {
+            width: 100%;
+            appearance: none;
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #0ea5e9, #6366f1);
+            outline: none;
+        }
+
+        .controls input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #0ea5e9;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+            cursor: pointer;
+        }
+
+        .controls input[type="number"] {
+            width: 4.5rem;
+            padding: 0.45rem 0.65rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            text-align: center;
+            background: #f8fafc;
+            color: var(--text);
+        }
+
+        .window-controls {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .window-controls .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .window-controls input[type="time"] {
+            padding: 0.45rem 0.65rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: var(--text);
+            font: inherit;
+        }
+
+        .window-controls button {
+            padding: 0.55rem 1.4rem;
+        }
+
+        .time-readout {
+            margin-top: 0.5rem;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .timeline-axis {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .timeline-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .timeline-row {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .boat-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .boat-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid rgba(15, 23, 42, 0.1);
+        }
+
+        .timeline-bar {
+            position: relative;
+            height: 18px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .timeline-active {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-radius: 999px;
+            opacity: 0.8;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: -6px;
+            width: 2px;
+            bottom: -6px;
+            background: #0f172a;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+        }
+
+        .boat-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.85rem;
+        }
+
+        .status-card {
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            min-height: 88px;
+        }
+
+        .status-card h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .status-card span {
+            font-size: 0.82rem;
+            color: var(--muted);
+            letter-spacing: 0.02em;
+        }
+
+        .status-card .value {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        footer {
+            text-align: center;
+            padding: 0.75rem 1rem 1.4rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        @media (max-width: 720px) {
+            .timeline-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .boat-label {
+                justify-content: space-between;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .controls button {
+                width: 100%;
+            }
+
+            .window-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Regatta Timeline &amp; Boat Comparison</h1>
+        <p>Overlay two GPX recordings from 26 Oct 2025 to compare positions along a unified timeline. Use the controls to scrub or play through the day and watch each boat update in real time.</p>
+    </header>
+    <main>
+        <div id="map"></div>
+
+        <section class="panel" aria-labelledby="timeline-controls">
+            <h2 id="timeline-controls">Timeline Controls</h2>
+            <div class="controls">
+                <button id="play-toggle" type="button">Play</button>
+                <button id="reset-timeline" type="button" class="secondary">Reset</button>
+                <div class="slider">
+                    <label for="timeline-slider">Timeline</label>
+                    <input id="timeline-slider" type="range" min="0" max="1000" value="0" step="1">
+                </div>
+                <div class="slider" style="max-width: 160px;">
+                    <label for="speed-input">Playback Speed (×)</label>
+                    <input id="speed-input" type="number" min="0.1" max="30" step="0.1" value="30.0">
+                </div>
+            </div>
+            <div class="time-readout">
+                <div><strong id="current-time">--:--</strong> current selection</div>
+                <div>Range <span id="range-start">--</span> → <span id="range-end">--</span></div>
+                <div>Total span <span id="range-duration">--</span></div>
+            </div>
+            <div class="window-controls">
+                <div class="field">
+                    <label for="window-start">Window Start</label>
+                    <input id="window-start" type="time" step="1">
+                </div>
+                <div class="field">
+                    <label for="window-end">Window End</label>
+                    <input id="window-end" type="time" step="1">
+                </div>
+                <button id="apply-window" type="button">Apply Window</button>
+                <button id="reset-window" type="button" class="secondary">Reset Window</button>
+            </div>
+        </section>
+
+        <section class="panel" aria-labelledby="timeline-breakdown">
+            <h2 id="timeline-breakdown">Boat Timelines</h2>
+            <div class="timeline">
+                <div class="timeline-axis">
+                    <span id="axis-start">--</span>
+                    <span id="axis-end">--</span>
+                </div>
+                <div id="timeline-rows" class="timeline-rows"></div>
+            </div>
+        </section>
+
+        <section class="panel" aria-labelledby="boat-status-heading">
+            <h2 id="boat-status-heading">Boat Status</h2>
+            <div id="boat-status" class="boat-status"></div>
+        </section>
+    </main>
+    <footer>
+        Built with Leaflet &middot; Tracks from <code>data/rerata_26_oct.gpx</code> and <code>data/2025-10-26-8_43.gpx</code>
+    </footer>
+
+    <script src="./data/track-inline-data.js"></script>
+    <script>
+        const TRACK_CONFIG = [
+            {
+                id: 'rerata',
+                name: 'Rerata',
+                color: '#f97316',
+                gpxPath: './data/rerata_26_oct.gpx',
+                inlineId: 'rerata'
+            },
+            {
+                id: 'boat_two',
+                name: 'Boat Two',
+                color: '#6366f1',
+                gpxPath: './data/2025-10-26-8_43.gpx',
+                inlineId: 'boat_two'
+            }
+        ];
+
+        const map = L.map('map', {
+            zoomControl: true,
+            attributionControl: false
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const timelineSlider = document.getElementById('timeline-slider');
+        const playToggle = document.getElementById('play-toggle');
+        const resetTimelineButton = document.getElementById('reset-timeline');
+        const speedInput = document.getElementById('speed-input');
+        const windowStartInput = document.getElementById('window-start');
+        const windowEndInput = document.getElementById('window-end');
+        const applyWindowButton = document.getElementById('apply-window');
+        const resetWindowButton = document.getElementById('reset-window');
+
+        const currentTimeEl = document.getElementById('current-time');
+        const rangeStartEl = document.getElementById('range-start');
+        const rangeEndEl = document.getElementById('range-end');
+        const rangeDurationEl = document.getElementById('range-duration');
+        const axisStartEl = document.getElementById('axis-start');
+        const axisEndEl = document.getElementById('axis-end');
+        const timelineRowsEl = document.getElementById('timeline-rows');
+        const boatStatusEl = document.getElementById('boat-status');
+
+        const TRACKS = [];
+        let globalStart = null;
+        let globalEnd = null;
+        let animationFrame = null;
+        let previousTimestamp = null;
+        let isPlaying = false;
+        let windowStart = null;
+        let windowEnd = null;
+        let sliderFraction = 0;
+
+        function pad(value) {
+            return String(value).padStart(2, '0');
+        }
+
+        function formatTime(date) {
+            if (!date) return '--';
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function formatDuration(ms) {
+            if (!Number.isFinite(ms) || ms <= 0) return '--';
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const parts = [];
+            if (hours) parts.push(`${hours}h`);
+            if (minutes || hours) parts.push(`${minutes}m`);
+            parts.push(`${seconds}s`);
+            return parts.join(' ');
+        }
+
+        function toTimeInputValue(date) {
+            if (!date) return '';
+            return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        }
+
+        function fromTimeInputValue(value, referenceDate) {
+            if (!value) return null;
+            const segments = value.split(':').map(Number);
+            if (!segments.length || segments.some(Number.isNaN)) return null;
+            const [hours = 0, minutes = 0, seconds = 0] = segments;
+            const candidate = new Date(referenceDate.getTime());
+            candidate.setHours(hours, minutes, seconds, 0);
+            return candidate;
+        }
+
+        function updateWindowSummary() {
+            rangeStartEl.textContent = formatTime(windowStart);
+            rangeEndEl.textContent = formatTime(windowEnd);
+            rangeDurationEl.textContent = formatDuration(windowEnd.getTime() - windowStart.getTime());
+            windowStartInput.value = toTimeInputValue(windowStart);
+            windowEndInput.value = toTimeInputValue(windowEnd);
+        }
+
+        function decodeBase64ToText(value) {
+            if (!value) return null;
+            const clean = value.replace(/\s+/g, '');
+            const binary = atob(clean);
+            const length = binary.length;
+            const bytes = new Uint8Array(length);
+            for (let i = 0; i < length; i += 1) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new TextDecoder('utf-8').decode(bytes);
+        }
+
+        function interpolatePoint(points, targetTime) {
+            if (!points.length) {
+                return null;
+            }
+
+            if (targetTime <= points[0].time) {
+                return { lat: points[0].lat, lon: points[0].lon, time: points[0].time };
+            }
+
+            if (targetTime >= points[points.length - 1].time) {
+                const last = points[points.length - 1];
+                return { lat: last.lat, lon: last.lon, time: last.time };
+            }
+
+            let left = 0;
+            let right = points.length - 1;
+            const targetMs = targetTime.getTime();
+
+            while (left <= right) {
+                const mid = Math.floor((left + right) / 2);
+                const midTime = points[mid].time.getTime();
+                if (midTime === targetMs) {
+                    return { lat: points[mid].lat, lon: points[mid].lon, time: points[mid].time };
+                } else if (midTime < targetMs) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+
+            const upperIndex = Math.max(0, left);
+            const lowerIndex = Math.min(points.length - 1, upperIndex - 1);
+            const before = points[lowerIndex];
+            const after = points[upperIndex];
+
+            const span = after.time.getTime() - before.time.getTime();
+            const weight = span === 0 ? 0 : (targetMs - before.time.getTime()) / span;
+            const lat = before.lat + (after.lat - before.lat) * weight;
+            const lon = before.lon + (after.lon - before.lon) * weight;
+
+            return { lat, lon, time: targetTime };
+        }
+
+        function updateTimelineMarker(position) {
+            document.querySelectorAll('.timeline-marker').forEach(marker => {
+                marker.style.left = `${position}%`;
+            });
+        }
+
+        function updateBoatStatus(currentTime) {
+            TRACKS.forEach(track => {
+                const statusCard = track.statusCard;
+                const isActive = currentTime >= track.startTime && currentTime <= track.endTime;
+                statusCard.querySelector('.value').textContent = isActive ? 'Racing' : (currentTime < track.startTime ? 'Not started' : 'Finished');
+                statusCard.querySelector('.timestamp').textContent = formatTime(currentTime);
+            });
+        }
+
+        function updateBoatPositions(currentTime) {
+            TRACKS.forEach(track => {
+                if (!track.marker) return;
+                if (currentTime < track.startTime || currentTime > track.endTime) {
+                    track.marker.setStyle({ opacity: 0, fillOpacity: 0 });
+                    return;
+                }
+
+                track.marker.setStyle({ opacity: 1, fillOpacity: 0.95 });
+                const interpolated = interpolatePoint(track.points, currentTime);
+                if (interpolated) {
+                    track.marker.setLatLng([interpolated.lat, interpolated.lon]);
+                }
+            });
+
+            updateBoatStatus(currentTime);
+        }
+
+        function setTimelinePosition(fraction) {
+            const safeFraction = Math.min(Math.max(fraction, 0), 1);
+            sliderFraction = safeFraction;
+            const currentTime = new Date(windowStart.getTime() + safeFraction * (windowEnd.getTime() - windowStart.getTime()));
+            const globalSpan = globalEnd.getTime() - globalStart.getTime();
+            const globalPosition = globalSpan === 0 ? 0 : ((currentTime.getTime() - globalStart.getTime()) / globalSpan) * 100;
+
+            updateTimelineMarker(globalPosition);
+            updateBoatPositions(currentTime);
+            currentTimeEl.textContent = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            timelineSlider.value = Math.round(safeFraction * 1000);
+        }
+
+        function togglePlayback(forceState = null) {
+            const shouldPlay = forceState !== null ? forceState : !isPlaying;
+            if (shouldPlay) {
+                isPlaying = true;
+                playToggle.textContent = 'Pause';
+                previousTimestamp = null;
+                animationFrame = requestAnimationFrame(stepPlayback);
+            } else {
+                isPlaying = false;
+                playToggle.textContent = 'Play';
+                if (animationFrame) {
+                    cancelAnimationFrame(animationFrame);
+                    animationFrame = null;
+                }
+            }
+        }
+
+        function stepPlayback(timestamp) {
+            if (!isPlaying) return;
+
+            if (previousTimestamp === null) {
+                previousTimestamp = timestamp;
+            }
+
+            const deltaMs = (timestamp - previousTimestamp) * parseFloat(speedInput.value || '1');
+            previousTimestamp = timestamp;
+
+            const totalDuration = windowEnd.getTime() - windowStart.getTime();
+            const deltaFraction = totalDuration === 0 ? 0 : deltaMs / totalDuration;
+            let nextFraction = sliderFraction + deltaFraction;
+
+            if (nextFraction >= 1) {
+                nextFraction = 1;
+                togglePlayback(false);
+            }
+
+            setTimelinePosition(nextFraction);
+            animationFrame = requestAnimationFrame(stepPlayback);
+        }
+
+        async function loadGPXTrack(config) {
+            let text = null;
+
+            if (config.gpxPath) {
+                try {
+                    const response = await fetch(config.gpxPath);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${config.gpxPath}: ${response.status}`);
+                    }
+                    text = await response.text();
+                } catch (error) {
+                    if (window.location.protocol !== 'file:') {
+                        throw error;
+                    }
+                }
+            }
+
+            if (!text) {
+                const inlineKey = config.inlineId || config.id;
+                const inlineSource = window.TRACK_INLINE_DATA?.[inlineKey];
+                if (!inlineSource) {
+                    throw new Error(`GPX data for ${config.name} is not available locally.`);
+                }
+                text = decodeBase64ToText(inlineSource);
+            }
+
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(text, 'application/xml');
+
+            const pointElements = Array.from(xml.getElementsByTagName('trkpt'));
+            const points = [];
+            pointElements.forEach(element => {
+                const lat = parseFloat(element.getAttribute('lat'));
+                const lon = parseFloat(element.getAttribute('lon'));
+                const timeEl = element.getElementsByTagName('time')[0];
+                if (!timeEl || Number.isNaN(lat) || Number.isNaN(lon)) {
+                    return;
+                }
+
+                const time = new Date(timeEl.textContent.trim());
+                if (Number.isNaN(time.getTime())) {
+                    return;
+                }
+
+                points.push({ lat, lon, time });
+            });
+
+            if (!points.length) {
+                throw new Error(`No track points with timestamps found in ${config.gpxPath}`);
+            }
+
+            points.sort((a, b) => a.time - b.time);
+
+            const latLngs = points.map(pt => [pt.lat, pt.lon]);
+            const polyline = L.polyline(latLngs, {
+                color: config.color,
+                weight: 2.5,
+                opacity: 0.8,
+                lineJoin: 'round'
+            });
+
+            const startTime = points[0].time;
+            const endTime = points[points.length - 1].time;
+
+            const marker = L.circleMarker(latLngs[0], {
+                radius: 7,
+                weight: 2,
+                color: '#111827',
+                fillColor: config.color,
+                opacity: 1,
+                fillOpacity: 0.95
+            }).bindPopup(`${config.name}<br>${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+
+            return { ...config, points, polyline, marker, startTime, endTime, fullLatLngs: latLngs };
+        }
+
+        function buildTimelineUI(track) {
+            const row = document.createElement('div');
+            row.className = 'timeline-row';
+
+            const label = document.createElement('div');
+            label.className = 'boat-label';
+            const dot = document.createElement('span');
+            dot.className = 'boat-dot';
+            dot.style.background = track.color;
+            label.append(dot);
+            label.append(track.name);
+            row.append(label);
+
+            const bar = document.createElement('div');
+            bar.className = 'timeline-bar';
+
+            const active = document.createElement('div');
+            active.className = 'timeline-active';
+            active.style.background = track.color;
+
+            const marker = document.createElement('div');
+            marker.className = 'timeline-marker';
+
+            bar.append(active, marker);
+            row.append(bar);
+            timelineRowsEl.append(row);
+
+            track.timelineElements = { row, bar, active, marker };
+        }
+
+        function buildStatusCard(track) {
+            const card = document.createElement('div');
+            card.className = 'status-card';
+            card.innerHTML = `
+                <h3>
+                    <span>${track.name}</span>
+                    <small style="color:${track.color}">●</small>
+                </h3>
+                <div class="value">Loading</div>
+                <span class="timestamp"></span>
+                <span>Active ${formatTime(track.startTime)} → ${formatTime(track.endTime)}</span>
+            `;
+
+            boatStatusEl.append(card);
+            track.statusCard = card;
+        }
+
+        function updateTimelineRanges() {
+            const fullDuration = globalEnd.getTime() - globalStart.getTime();
+            TRACKS.forEach(track => {
+                const startOffset = track.startTime.getTime() - globalStart.getTime();
+                const endOffset = track.endTime.getTime() - globalStart.getTime();
+                const startPct = (startOffset / fullDuration) * 100;
+                const widthPct = ((endOffset - startOffset) / fullDuration) * 100;
+
+                track.timelineElements.active.style.left = `${startPct}%`;
+                track.timelineElements.active.style.width = `${widthPct}%`;
+                track.timelineElements.marker.dataset.trackId = track.id;
+            });
+        }
+
+        function updateTrackSegmentsForWindow() {
+            TRACKS.forEach(track => {
+                if (!track.polyline) return;
+                const segmentPoints = track.points.filter(pt => pt.time >= windowStart && pt.time <= windowEnd);
+                if (segmentPoints.length >= 2) {
+                    track.polyline.setLatLngs(segmentPoints.map(pt => [pt.lat, pt.lon]));
+                } else {
+                    track.polyline.setLatLngs(track.fullLatLngs);
+                }
+            });
+        }
+
+        async function boot() {
+            try {
+                const loadedTracks = await Promise.all(TRACK_CONFIG.map(loadGPXTrack));
+
+                const bounds = L.latLngBounds([]);
+                loadedTracks.forEach(track => {
+                    track.polyline.addTo(map);
+                    track.marker.addTo(map);
+                    track.marker.setStyle({ opacity: 0, fillOpacity: 0 });
+                    bounds.extend(track.polyline.getBounds());
+                    TRACKS.push(track);
+                });
+
+                map.fitBounds(bounds.pad(0.1));
+
+                globalStart = new Date(Math.min(...loadedTracks.map(t => t.startTime.getTime())));
+                globalEnd = new Date(Math.max(...loadedTracks.map(t => t.endTime.getTime())));
+
+                windowStart = new Date(globalStart.getTime());
+                windowEnd = new Date(globalEnd.getTime());
+
+                axisStartEl.textContent = formatTime(globalStart);
+                axisEndEl.textContent = formatTime(globalEnd);
+                updateWindowSummary();
+
+                TRACKS.forEach(track => {
+                    buildTimelineUI(track);
+                    buildStatusCard(track);
+                });
+
+                updateTimelineRanges();
+                updateTrackSegmentsForWindow();
+                setTimelinePosition(0);
+
+                timelineSlider.addEventListener('input', event => {
+                    const fraction = parseInt(event.target.value, 10) / 1000;
+                    setTimelinePosition(fraction);
+                });
+
+                playToggle.addEventListener('click', () => togglePlayback());
+                resetTimelineButton.addEventListener('click', () => {
+                    timelineSlider.value = 0;
+                    setTimelinePosition(0);
+                    togglePlayback(false);
+                });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        togglePlayback(false);
+                    }
+                });
+
+                speedInput.addEventListener('change', () => {
+                    const value = parseFloat(speedInput.value);
+                    if (Number.isNaN(value) || value <= 0 || value > 30) {
+                        speedInput.value = '30.0';
+                    }
+                });
+
+                applyWindowButton.addEventListener('click', () => {
+                    const desiredStart = fromTimeInputValue(windowStartInput.value, globalStart);
+                    const desiredEnd = fromTimeInputValue(windowEndInput.value, globalStart);
+                    if (!desiredStart || !desiredEnd) {
+                        alert('Please provide valid start and end times.');
+                        return;
+                    }
+
+                    const clampedStart = new Date(Math.max(desiredStart.getTime(), globalStart.getTime()));
+                    const clampedEnd = new Date(Math.min(desiredEnd.getTime(), globalEnd.getTime()));
+                    if (clampedEnd.getTime() <= clampedStart.getTime()) {
+                        alert('Window end must be after the window start.');
+                        return;
+                    }
+
+                    windowStart = clampedStart;
+                    windowEnd = clampedEnd;
+                    togglePlayback(false);
+                    timelineSlider.value = 0;
+                    updateWindowSummary();
+                    updateTrackSegmentsForWindow();
+                    setTimelinePosition(0);
+                });
+
+                resetWindowButton.addEventListener('click', () => {
+                    windowStart = new Date(globalStart.getTime());
+                    windowEnd = new Date(globalEnd.getTime());
+                    togglePlayback(false);
+                    timelineSlider.value = 0;
+                    updateWindowSummary();
+                    updateTrackSegmentsForWindow();
+                    setTimelinePosition(0);
+                });
+
+                setTimelinePosition(0);
+            } catch (error) {
+                console.error(error);
+                alert(error.message);
+            }
+        }
+
+        window.addEventListener('load', boot);
+    </script>
+</body>
+</html>
