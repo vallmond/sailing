@@ -101,7 +101,7 @@ def generate_html_visualization(gpx_file, bearing_threshold=60, start_segment=No
             if 'course_groups' in wind_analysis:
                 print(f"\nFiltered course groups: {len(wind_analysis['course_groups'])}")
                 for i, group in enumerate(wind_analysis['course_groups']):
-                    print(f"  Group {i+1}: {len(group)} points, avg course: {np.mean(group):.2f}°")
+                    print(f"  Group {i+1}: {len(group)} points, avg course: {sum(group)/len(group):.2f}°")
                     
             if 'avg_courses' in wind_analysis:
                 print(f"\nMain tacking directions: {wind_analysis['avg_courses']}")
