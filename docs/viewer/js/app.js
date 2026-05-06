@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const metrics = trackAnalyzer.calculateMetrics(selectedStartTime, selectedEndTime);
         
         // Update metrics display
-        distanceValue.textContent = (metrics.distance / 1000).toFixed(2) + ' km';
+        distanceValue.textContent = (metrics.distance / 1852).toFixed(2) + ' NM';
         durationValue.textContent = formatDuration(metrics.duration);
         avgSpeedValue.textContent = metrics.avgSpeed.toFixed(1) + ' knots';
         maxSpeedValue.textContent = metrics.maxSpeed.toFixed(1) + ' knots';
