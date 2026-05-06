@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sailing Track Viewer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>Track Viewer</h1>
+            
+            <div class="file-inputs">
+                <h2>Input Files</h2>
+                <div class="input-group">
+                    <label for="gpx-file">GPX Track: <span class="info-icon" id="gpx-info">ⓘ</span></label>
+                    <input type="file" id="gpx-file" accept=".gpx,.json">
+                    <div class="tooltip" id="gpx-tooltip">
+                        <h4>Supported File Formats</h4>
+                        <p><a href="sample-track.gpx" download>Download Sample GPX File</a></p>
+                        <p><strong>GPX File:</strong> Standard GPX format with trackpoints containing lat, lon, and time.</p>
+                        <p><strong>JSON File:</strong> Pre-processed JSON with the following structure:</p>
+                        <pre>{
+  "points": [
+    {
+      "lat": 54.448913,
+      "lon": 18.581427,
+      "time": "2025-05-31T08:31:01.400Z",
+      "speed": 4.2,  // Optional
+      "course": 120  // Optional
+    },
+    ...
+  ]
+}</pre>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="markers-file">Markers/Buoys: <span class="info-icon" id="markers-info">ⓘ</span></label>
+                    <input type="file" id="markers-file" accept=".json">
+                    <div class="tooltip" id="markers-tooltip">
+                        <h4>Markers File Format (JSON)</h4>
+                        <p><a href="sample-markers.json" download>Download Sample Markers File</a></p>
+                        <pre>{
+  "buoys": [
+    {
+      "name": "Buoy 1",
+      "lat": 54.450,
+      "lon": 18.580,
+      "color": "#ff0000",
+      "description": "Port rounding"
+    }
+  ],
+  "startLine": {
+    "point1": { "lat": 54.448, "lon": 18.581 },
+    "point2": { "lat": 54.449, "lon": 18.583 }
+  },
+  "markers": [
+    {
+      "name": "Special Point",
+      "lat": 54.451,
+      "lon": 18.585,
+      "color": "#00ff00",
+      "description": "Point of interest"
+    }
+  ]
+}</pre>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="wind-direction">Wind Direction (°): <span class="info-icon" id="wind-info">ⓘ</span></label>
+                    <input type="number" id="wind-direction" min="0" max="359" value="0">
+                    <div class="tooltip" id="wind-tooltip">
+                        <h4>Wind Direction</h4>
+                        <p>Enter the direction <strong>FROM</strong> which the wind is coming in degrees (0-359).</p>
+                        <ul>
+                            <li><strong>0° = North</strong> (wind coming from the north)</li>
+                            <li><strong>90° = East</strong> (wind coming from the east)</li>
+                            <li><strong>180° = South</strong> (wind coming from the south)</li>
+                            <li><strong>270° = West</strong> (wind coming from the west)</li>
+                        </ul>
+                        <p>This will be used to calculate your sailing angles relative to the wind.</p>
+                    </div>
+                </div>
+                <button id="load-data">Load Data</button>
+            </div>
+            
+            <div class="time-controls">
+                <h2>Time Range</h2>
+                <div id="time-slider-range"></div>
+                <div class="time-labels">
+                    <span id="start-time">Start: --:--:--</span>
+                    <span id="end-time">End: --:--:--</span>
+                </div>
+                <div class="playback-controls">
+                    <button id="play-pause"><i class="play-icon"></i></button>
+                    <input type="range" id="playback-speed" min="1" max="10" value="5">
+                    <label for="playback-speed">Speed</label>
+                </div>
+            </div>
+            
+            <div class="metrics">
+                <h2>Track Metrics</h2>
+                <div class="metric-group">
+                    <div class="metric">
+                        <span class="metric-label">Distance:</span>
+                        <span id="distance-value">-- km</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Duration:</span>
+                        <span id="duration-value">-- min</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Avg Speed:</span>
+                        <span id="avg-speed-value">-- knots</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Max Speed:</span>
+                        <span id="max-speed-value">-- knots</span>
+                    </div>
+                </div>
+                
+                <div class="metric-group">
+                    <h3>Wind Analysis</h3>
+                    <div class="metric">
+                        <span class="metric-label">Avg Angle to Wind:</span>
+                        <span id="avg-wind-angle-value">--°</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Tacks:</span>
+                        <span id="tack-count-value">--</span>
+                    </div>
+                    <div class="wind-rose" id="wind-rose-chart"></div>
+                </div>
+            </div>
+            
+            <div class="display-options">
+                <h2>Display Options</h2>
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="show-track" checked>
+                        Show Track
+                    </label>
+                    <label>
+                        <input type="checkbox" id="show-markers" checked>
+                        Show Markers
+                    </label>
+                    <label>
+                        <input type="checkbox" id="show-wind" checked>
+                        Show Wind Direction
+                    </label>
+                    <label>
+                        <input type="checkbox" id="color-by-speed" checked>
+                        Color by Speed
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/gpx-parser.js"></script>
+    <script src="js/track-analyzer.js"></script>
+    <script src="js/map-controller.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

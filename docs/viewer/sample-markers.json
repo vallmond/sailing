@@ -1,0 +1,53 @@
+{
+  "buoys": [
+    {
+      "name": "North Mark",
+      "lat": 54.452,
+      "lon": 18.583,
+      "color": "#ff0000",
+      "description": "Port rounding"
+    },
+    {
+      "name": "East Mark",
+      "lat": 54.450,
+      "lon": 18.587,
+      "color": "#00ff00",
+      "description": "Starboard rounding"
+    },
+    {
+      "name": "South Mark",
+      "lat": 54.447,
+      "lon": 18.582,
+      "color": "#0000ff",
+      "description": "Port rounding"
+    }
+  ],
+  "startLine": {
+    "point1": {
+      "lat": 54.448,
+      "lon": 18.581,
+      "name": "Pin End"
+    },
+    "point2": {
+      "lat": 54.449,
+      "lon": 18.583,
+      "name": "Committee Boat"
+    }
+  },
+  "markers": [
+    {
+      "name": "Shallow Area",
+      "lat": 54.451,
+      "lon": 18.585,
+      "color": "#ff00ff",
+      "description": "Avoid - shallow water"
+    },
+    {
+      "name": "Finish Line",
+      "lat": 54.449,
+      "lon": 18.579,
+      "color": "#ffaa00",
+      "description": "Race finish"
+    }
+  ]
+}
