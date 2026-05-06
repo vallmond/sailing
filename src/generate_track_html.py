@@ -206,7 +206,7 @@ def generate_html_visualization(gpx_file, bearing_threshold=60, start_segment=No
             'points': [{'lat': p.lat, 'lon': p.lon, 'time': p.time.isoformat() if p.time else None} for p in segment['points']],
             'segment_type': segment.get('segment_type', 'straight'),  # Add segment type information
             'metrics': {
-                'distance_km': segment['total_distance_meters'] / 1000,  # Convert meters to km
+                'distance_nm': segment['total_distance_meters'] / 1852,
                 'duration_minutes': segment['duration_seconds'] / 60,  # Convert seconds to minutes
                 'speed_knots': segment['avg_speed_knots'],
                 'overall_bearing': segment['overall_bearing'],
@@ -267,7 +267,7 @@ def generate_html_visualization(gpx_file, bearing_threshold=60, start_segment=No
     }
     
     # Calculate overall track metrics
-    total_distance = sum(segment['total_distance_meters'] for segment in segment_metrics) / 1000  # Convert to km
+    total_distance = sum(segment['total_distance_meters'] for segment in segment_metrics) / 1852
     total_duration = sum(segment['duration_seconds'] for segment in segment_metrics) / 60  # Convert to minutes
     avg_speed = sum(segment['avg_speed_knots'] for segment in segment_metrics) / len(segment_metrics) if segment_metrics else 0
     min_speed = min(segment['avg_speed_knots'] for segment in segment_metrics) if segment_metrics else 0
@@ -447,7 +447,7 @@ def generate_html_visualization(gpx_file, bearing_threshold=60, start_segment=No
             <div class="segment-info">
                 <div><span class="segment-info-label">Segment:</span> ${segment.index}</div>
                 <div><span class="segment-info-label">Type:</span> <strong>${segment.segment_type}</strong></div>
-                <div><span class="segment-info-label">Distance:</span> ${metrics.distance_km.toFixed(2)} km</div>
+                <div><span class="segment-info-label">Distance:</span> ${metrics.distance_nm.toFixed(2)} NM</div>
                 <div><span class="segment-info-label">Duration:</span> ${metrics.duration_minutes.toFixed(2)} min</div>
                 <div><span class="segment-info-label">Avg Speed:</span> ${metrics.speed_knots.toFixed(2)} knots</div>
                 <div><span class="segment-info-label">Speed Category:</span> <span style="color:${color}">${metrics.speed_category}</span></div>
@@ -616,7 +616,7 @@ def generate_html_visualization(gpx_file, bearing_threshold=60, start_segment=No
                 }
                 
                 // Add popup with line information
-                line.bindPopup(`<b>${markerName}</b><br>Length: ${(lineDistance / 1000).toFixed(3)} km`);
+                line.bindPopup(`<b>${markerName}</b><br>Length: ${(lineDistance / 1852).toFixed(3)} NM`);
                 
                 // Add small markers at line endpoints if needed
                 if (marker.showEndpoints !== false) {
@@ -659,7 +659,7 @@ def generate_html_visualization(gpx_file, bearing_threshold=60, start_segment=No
     info.onAdd = function(map) {
         const div = L.DomUtil.create('div', 'info');
         div.innerHTML = '<h4>Track Information</h4>' +
-            `<div><b>Distance:</b> ${trackMetrics.totalDistance.toFixed(2)} km</div>` +
+            `<div><b>Distance:</b> ${trackMetrics.totalDistance.toFixed(2)} NM</div>` +
             `<div><b>Duration:</b> ${trackMetrics.totalDuration.toFixed(2)} min</div>` +
             `<div><b>Avg Speed:</b> ${trackMetrics.avgSpeed.toFixed(2)} knots</div>` +
             `<div><b>Min Speed:</b> ${trackMetrics.minSpeed.toFixed(2)} knots</div>` +
