@@ -1,0 +1,26 @@
+[
+  {
+    "type": "marker",
+    "name": "GD",
+    "lat": 54.534094,
+    "lon": 18.663917
+  },
+  {
+    "type": "marker",
+    "name": "PMW",
+    "lat": 54.482905,
+    "lon": 18.664228
+  },
+  {
+    "type": "marker",
+    "name": "Buoy 1",
+    "lat": 54.514922,
+    "lon": 18.591002
+  },
+  {
+    "type": "marker",
+    "name": "Buoy 2",
+    "lat": 54.501329,
+    "lon": 18.595068
+  }
+]
