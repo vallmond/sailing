@@ -1,0 +1,20 @@
+[
+  {
+    "type": "marker",
+    "name": "GD",
+    "lat": 54.534094,
+    "lon": 18.663917
+  },
+  {
+    "type": "marker",
+    "name": "PMW",
+    "lat": 54.482905,
+    "lon": 18.664228
+  },
+  {
+    "type": "marker",
+    "name": "Finish",
+    "lat": 54.514230,
+    "lon": 18.591830
+  }
+]
