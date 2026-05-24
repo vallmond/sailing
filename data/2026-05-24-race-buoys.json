@@ -1,0 +1,12 @@
+[
+  {
+    "type": "line",
+    "name": "Start Line",
+    "color": "#00AA00",
+    "width": 3,
+    "points": [
+      { "lat": 54.379664, "lon": 18.790214 },
+      { "lat": 54.380194, "lon": 18.787881 }
+    ]
+  }
+]
