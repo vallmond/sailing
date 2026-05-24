@@ -1,15 +1,21 @@
 [
   {
     "date": "2026-05-24",
-    "time": "8:18",
-    "file": "2026-05-24-8_18_visualization.html",
-    "title": "Aresa – Wyścig (1 race)"
+    "time": "11:05",
+    "file": "2026-05-24-race3_visualization.html",
+    "title": "Aresa – Puchar \"Przyjaźń narodów\" 1 etap – Wyścig 3"
   },
   {
     "date": "2026-05-23",
-    "time": "8:04",
-    "file": "2026-05-23-8_04_visualization.html",
-    "title": "Aresa – Trening (2 races)"
+    "time": "14:34",
+    "file": "2026-05-23-race2_visualization.html",
+    "title": "Aresa – Puchar \"Przyjaźń narodów\" 1 etap – Wyścig 2"
+  },
+  {
+    "date": "2026-05-23",
+    "time": "11:05",
+    "file": "2026-05-23-race1_visualization.html",
+    "title": "Aresa – Puchar \"Przyjaźń narodów\" 1 etap – Wyścig 1"
   },
   {
     "date": "2026-05-03",
