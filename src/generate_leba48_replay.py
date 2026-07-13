@@ -300,7 +300,7 @@ RACE.boats.forEach(b=>{
 });
 
 function makeIcon(b,hdg,phase){
-  const short = b.name==="Notre Dame" ? "ND" : b.name;
+  const short = b.name;
   const dim = phase==="pre" ? "opacity:.55;" : "";
   const arw = (phase==="out"||phase==="ret")
     ? `<div class="arw" style="transform:translate(-50%,-100%) rotate(${hdg}deg);"></div>` : "";

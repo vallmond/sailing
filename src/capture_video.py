@@ -63,12 +63,23 @@ def main():
             f = i / (n_frames - 1)
             t = T0 + f * SPAN
             page.evaluate("(t) => window.CAP.renderAt(t)", t)
-            page.wait_for_timeout(15)  # let canvas/DOM paint
+            # follow-camera moves each frame -> wait for newly requested tiles
+            try:
+                page.wait_for_function("window.CAP.tilesPending() === 0", timeout=6000)
+            except Exception:
+                pass
+            page.wait_for_timeout(30)  # let canvas/DOM paint
             page.screenshot(path=os.path.join(frames_dir, f"f{i:05d}.png"))
             if i % 30 == 0:
                 print(f"  frame {i}/{n_frames}")
 
-        # hold on last frame
+        # hold just past the finish so the winner headline (both boats in) shows
+        page.evaluate("(t) => window.CAP.renderAt(t)", T0 + SPAN + 120)
+        try:
+            page.wait_for_function("window.CAP.tilesPending() === 0", timeout=6000)
+        except Exception:
+            pass
+        page.wait_for_timeout(50)
         for k in range(hold_frames):
             page.screenshot(path=os.path.join(frames_dir, f"f{n_frames + k:05d}.png"))
 

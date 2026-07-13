@@ -4,8 +4,10 @@ Generate a VERTICAL (1080x1920) capture-optimised page for the 48h race replay,
 designed to be frame-stepped by a headless browser -> PNG frames -> ffmpeg -> MP4
 for Instagram / TikTok.
 
-Dark CARTO basemap, glowing tracks, broadcast-style HUD. No controls / autoplay:
-exposes window.CAP = { T0, T1, SPAN, ready, renderAt(t) }.
+LIGHT theme (CARTO Voyager), broadcast-style HUD, and a FOLLOW-CAMERA that keeps
+both boats framed and zoomed in (not a static overview) so the tacking detail is
+large on screen. No controls / autoplay: exposes
+    window.CAP = { T0, T1, SPAN, ready, tilesPending(), renderAt(t) }.
 
 Reuses timing + track data from generate_leba48_replay.build_race().
 """
@@ -26,55 +28,55 @@ TEMPLATE = r"""<!DOCTYPE html>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
-  html,body { width:1080px; height:1920px; overflow:hidden; background:#05070d;
-              font-family:"Inter","Helvetica Neue",system-ui,-apple-system,sans-serif; color:#fff; }
-  #map { position:fixed; inset:0; width:1080px; height:1920px; background:#05070d; }
-  .leaflet-container { background:#05070d; }
+  html,body { width:1080px; height:1920px; overflow:hidden; background:#dbe7ef;
+              font-family:"Inter","Helvetica Neue",system-ui,-apple-system,sans-serif; color:#0f172a; }
+  #map { position:fixed; inset:0; width:1080px; height:1920px; background:#dbe7ef; }
+  .leaflet-container { background:#dbe7ef; }
   #hud { position:fixed; inset:0; pointer-events:none; z-index:600;
          display:flex; flex-direction:column; justify-content:space-between; }
   /* top */
-  .top { padding:60px 60px 0; text-align:center;
-         background:linear-gradient(180deg, rgba(5,7,13,0.92) 0%, rgba(5,7,13,0.6) 55%, rgba(5,7,13,0) 100%); }
-  .title { font-size:40px; font-weight:800; letter-spacing:6px; color:#e2e8f0; }
-  .subtitle { margin-top:8px; font-size:22px; font-weight:600; letter-spacing:3px; color:#7c8798; text-transform:uppercase; }
-  .clock { margin-top:26px; display:inline-flex; align-items:baseline; gap:20px; padding:14px 34px;
-           background:rgba(15,23,42,0.55); border:1px solid rgba(148,163,184,0.28); border-radius:22px;
-           backdrop-filter:blur(6px); }
-  .clock .cday { font-size:26px; font-weight:700; letter-spacing:4px; color:#94a3b8; text-transform:uppercase; }
-  .clock .ctime { font-size:64px; font-weight:800; letter-spacing:2px; color:#fff; font-variant-numeric:tabular-nums; line-height:1; }
+  .top { padding:56px 60px 0; text-align:center;
+         background:linear-gradient(180deg, rgba(247,250,252,0.96) 0%, rgba(247,250,252,0.72) 52%, rgba(247,250,252,0) 100%); }
+  .title { font-size:40px; font-weight:800; letter-spacing:6px; color:#0f172a; }
+  .subtitle { margin-top:8px; font-size:22px; font-weight:700; letter-spacing:3px; color:#5b6b7d; text-transform:uppercase; }
+  .clock { margin-top:24px; display:inline-flex; align-items:baseline; gap:20px; padding:14px 34px;
+           background:rgba(255,255,255,0.82); border:1px solid rgba(15,23,42,0.10); border-radius:22px;
+           box-shadow:0 10px 30px rgba(15,23,42,0.14); backdrop-filter:blur(6px); }
+  .clock .cday { font-size:26px; font-weight:800; letter-spacing:4px; color:#64748b; text-transform:uppercase; }
+  .clock .ctime { font-size:64px; font-weight:800; letter-spacing:2px; color:#0f172a; font-variant-numeric:tabular-nums; line-height:1; }
   /* bottom */
   .bottom { padding:0 48px 70px;
-            background:linear-gradient(0deg, rgba(5,7,13,0.94) 0%, rgba(5,7,13,0.72) 55%, rgba(5,7,13,0) 100%); }
-  .lead { text-align:center; font-size:30px; font-weight:800; letter-spacing:2px; margin-bottom:8px;
+            background:linear-gradient(0deg, rgba(247,250,252,0.97) 0%, rgba(247,250,252,0.80) 55%, rgba(247,250,252,0) 100%); }
+  .lead { text-align:center; font-size:30px; font-weight:800; letter-spacing:2px; margin-bottom:8px; color:#0f172a;
           white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .lead .gap { color:#94a3b8; font-weight:700; letter-spacing:2px; }
+  .lead .gap { color:#5b6b7d; font-weight:700; letter-spacing:2px; }
   .boats { display:flex; flex-direction:column; gap:16px; margin-top:22px; }
   .brow { display:flex; align-items:center; gap:22px; padding:22px 28px; border-radius:20px;
-          background:rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.20); border-left-width:8px; }
-  .brow .dot { width:26px; height:26px; border-radius:50%; flex:none; box-shadow:0 0 18px 3px var(--c); background:var(--c); }
-  .brow .nm { font-size:38px; font-weight:800; letter-spacing:1px; min-width:230px; }
-  .brow .ph { font-size:24px; font-weight:600; color:#9aa6b6; flex:1; }
+          background:rgba(255,255,255,0.90); border:1px solid rgba(15,23,42,0.08); border-left-width:8px;
+          box-shadow:0 8px 24px rgba(15,23,42,0.12); }
+  .brow .dot { width:26px; height:26px; border-radius:50%; flex:none; box-shadow:0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent); background:var(--c); }
+  .brow .nm { font-size:36px; font-weight:800; letter-spacing:0.5px; min-width:300px; color:#0f172a; }
+  .brow .ph { font-size:24px; font-weight:700; color:#64748b; flex:1; white-space:nowrap; }
   .brow .stat { text-align:right; font-variant-numeric:tabular-nums; }
-  .brow .stat .v { font-size:40px; font-weight:800; line-height:1; }
-  .brow .stat .l { font-size:20px; font-weight:600; color:#8b97a7; letter-spacing:1px; }
-  .brow .stat.spd { min-width:150px; }
+  .brow .stat .v { font-size:40px; font-weight:800; line-height:1; color:#0f172a; }
+  .brow .stat .l { font-size:20px; font-weight:700; color:#8b97a7; letter-spacing:1px; }
+  .brow .stat.spd { min-width:130px; }
   .brow .stat.dst { min-width:210px; }
-  .progress { margin-top:30px; height:10px; border-radius:6px; background:rgba(148,163,184,0.22); overflow:hidden; }
+  .progress { margin-top:30px; height:10px; border-radius:6px; background:rgba(15,23,42,0.12); overflow:hidden; }
   .progress .pfill { height:100%; width:0%; background:linear-gradient(90deg,#e6550d,#f59e0b); }
   /* boat markers */
   .bmk { position:relative; }
-  .bmk .glow { position:absolute; left:50%; top:50%; width:34px; height:34px; border-radius:50%;
-     transform:translate(-50%,-50%); background:var(--c); opacity:0.35; filter:blur(6px); }
-  .bmk .core { position:absolute; left:50%; top:50%; width:18px; height:18px; border-radius:50%;
-     transform:translate(-50%,-50%); background:var(--c); border:3px solid #fff; box-shadow:0 0 12px var(--c); }
+  .bmk .core { position:absolute; left:50%; top:50%; width:22px; height:22px; border-radius:50%;
+     transform:translate(-50%,-50%); background:var(--c); border:4px solid #fff;
+     box-shadow:0 0 0 2px var(--c), 0 3px 8px rgba(15,23,42,0.45); }
   .bmk .arw { position:absolute; left:50%; top:50%; width:0; height:0;
-     border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:20px solid var(--c);
-     transform-origin:50% 100%; filter:drop-shadow(0 0 6px var(--c)); }
-  .bmk .tag { position:absolute; left:50%; top:26px; transform:translateX(-50%); background:var(--c); color:#fff;
-     font-size:22px; font-weight:800; letter-spacing:1px; padding:3px 12px; border-radius:9px; white-space:nowrap;
-     box-shadow:0 2px 10px rgba(0,0,0,.5); }
-  .city { font-size:24px; font-weight:800; letter-spacing:5px; color:#cbd5e1;
-     text-shadow:0 0 8px #000,0 0 14px #000; white-space:nowrap; }
+     border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:22px solid var(--c);
+     transform-origin:50% 100%; filter:drop-shadow(0 1px 2px rgba(255,255,255,0.9)); }
+  .bmk .tag { position:absolute; left:50%; top:30px; transform:translateX(-50%); background:var(--c); color:#fff;
+     font-size:22px; font-weight:800; letter-spacing:0.5px; padding:4px 14px; border-radius:10px; white-space:nowrap;
+     box-shadow:0 3px 10px rgba(15,23,42,0.35); }
+  .city { font-size:26px; font-weight:800; letter-spacing:5px; color:#1f2d3d;
+     text-shadow:0 0 7px #fff,0 0 12px #fff,0 0 3px #fff; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -125,34 +127,38 @@ function boatState(b,t){const{out,ret}=b;
   const n=ret.coords.length-1,p=ret.coords[n];
   return{phase:"fin",lat:p[0],lon:p[1],idx:n,leg:ret,speed:0,destLeft:0,rank:5};}
 
-const map=L.map("map",{zoomControl:false,attributionControl:false,preferCanvas:true,fadeAnimation:false,zoomAnimation:false});
-const base=L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+const map=L.map("map",{zoomControl:false,attributionControl:false,preferCanvas:true,
+  fadeAnimation:false,zoomAnimation:false,inertia:false,zoomSnap:0});
+map.setView([54.6,18.15],10);
+const base=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
   {subdomains:"abcd",maxZoom:19}).addTo(map);
+let pending=0;
+base.on("tileloadstart",()=>{pending++;});
+base.on("tileload",()=>{pending=Math.max(0,pending-1);});
+base.on("tileerror",()=>{pending=Math.max(0,pending-1);});
 
-const allPts=[]; const RS=[];
+const RS=[];
 RACE.boats.forEach(b=>{
-  const faint={color:b.color,weight:2,opacity:0.18,lineJoin:"round"};
+  const faint={color:b.color,weight:2,opacity:0.30,lineJoin:"round"};
   L.polyline(b.out.coords,faint).addTo(map);
   L.polyline(b.ret.coords,faint).addTo(map);
-  const glowStyle={color:b.color,weight:11,opacity:0.22,lineJoin:"round",lineCap:"round"};
-  const brightStyle={color:b.color,weight:4,opacity:1,lineJoin:"round",lineCap:"round"};
-  const gO=L.polyline([],glowStyle).addTo(map), gR=L.polyline([],glowStyle).addTo(map);
-  const pO=L.polyline([],brightStyle).addTo(map), pR=L.polyline([],brightStyle).addTo(map);
+  const casing={color:"#ffffff",weight:8,opacity:0.9,lineJoin:"round",lineCap:"round"};
+  const bright={color:b.color,weight:4.5,opacity:1,lineJoin:"round",lineCap:"round"};
+  const cO=L.polyline([],casing).addTo(map), cR=L.polyline([],casing).addTo(map);
+  const pO=L.polyline([],bright).addTo(map), pR=L.polyline([],bright).addTo(map);
   const mk=L.marker([b.out.coords[0][0],b.out.coords[0][1]],{icon:makeIcon(b,0,"pre"),zIndexOffset:1000,interactive:false}).addTo(map);
-  RS.push({b,gO,gR,pO,pR,mk});
-  b.out.coords.forEach(c=>allPts.push(c)); b.ret.coords.forEach(c=>allPts.push(c));
+  RS.push({b,cO,cR,pO,pR,mk});
 });
-function makeIcon(b,hdg,phase){const short=b.name==="Notre Dame"?"ND":"ARIES";
+function makeIcon(b,hdg,phase){const label=b.name;
   const arw=(phase==="out"||phase==="ret")?`<div class="arw" style="transform:translate(-50%,-100%) rotate(${hdg}deg);"></div>`:"";
-  const dim=phase==="pre"?"opacity:.5;":"";
-  const tagTop=b.name==="Notre Dame"?"top:-38px":"top:26px";  // stagger tags so they don't collide
-  return L.divIcon({className:"",iconSize:[18,18],iconAnchor:[9,9],
-    html:`<div class="bmk" style="--c:${b.color};${dim}"><div class="glow"></div>${arw}<div class="core"></div><div class="tag" style="${tagTop}">${short}</div></div>`});}
+  const dim=phase==="pre"?"opacity:.55;":"";
+  const tagTop=b.name==="Notre Dame"?"top:-40px":"top:30px";  // stagger tags so they don't collide
+  return L.divIcon({className:"",iconSize:[22,22],iconAnchor:[11,11],
+    html:`<div class="bmk" style="--c:${b.color};${dim}">${arw}<div class="core"></div><div class="tag" style="${tagTop}">${label}</div></div>`});}
 function mean(g){const a=RACE.boats.map(g);return[a.reduce((s,p)=>s+p[0],0)/a.length,a.reduce((s,p)=>s+p[1],0)/a.length];}
 function city(pos,txt){L.marker(pos,{icon:L.divIcon({className:"",iconSize:[0,0],html:`<div class="city">${txt}</div>`}),interactive:false}).addTo(map);}
 city(mean(b=>b.out.coords[0]),"GDAŃSK");
 city(mean(b=>b.out.coords[b.out.coords.length-1]),"ŁEBA");
-map.fitBounds(L.latLngBounds(allPts),{paddingTopLeft:[50,360],paddingBottomRight:[50,520]});
 
 // build boat rows
 const boatsEl=document.getElementById("boats");
@@ -165,16 +171,21 @@ RACE.boats.forEach((b,i)=>{const el=document.createElement("div");el.className="
 
 const STATUS={pre:"przed startem",out:"→ do Łeby",stop:"postój w Łebie",ret:"← do Gdańska",fin:"na mecie 🏁"};
 
+// follow-camera tuning
+const FOLLOW_MULT=2.0;       // context around the boat separation
+const MIN_DLAT=0.055, MIN_DLON=0.095;   // min view (~6 km) so single-point views aren't over-zoomed
+const CAM_PAD_TL=[46,300], CAM_PAD_BR=[46,380], CAM_MAXZOOM=13.5;
+
 function renderAt(t){
   const states=RACE.boats.map(b=>boatState(b,t));
   RS.forEach((rs,i)=>{const st=states[i],b=rs.b;
-    if(st.phase==="pre"){rs.pO.setLatLngs([]);rs.gO.setLatLngs([]);rs.pR.setLatLngs([]);rs.gR.setLatLngs([]);}
+    if(st.phase==="pre"){rs.pO.setLatLngs([]);rs.cO.setLatLngs([]);rs.pR.setLatLngs([]);rs.cR.setLatLngs([]);}
     else if(st.phase==="out"){const seg=b.out.coords.slice(0,st.idx).concat([[st.lat,st.lon]]);
-      rs.pO.setLatLngs(seg);rs.gO.setLatLngs(seg);rs.pR.setLatLngs([]);rs.gR.setLatLngs([]);}
-    else if(st.phase==="stop"){rs.pO.setLatLngs(b.out.coords);rs.gO.setLatLngs(b.out.coords);rs.pR.setLatLngs([]);rs.gR.setLatLngs([]);}
-    else if(st.phase==="ret"){rs.pO.setLatLngs(b.out.coords);rs.gO.setLatLngs(b.out.coords);
-      const seg=b.ret.coords.slice(0,st.idx).concat([[st.lat,st.lon]]);rs.pR.setLatLngs(seg);rs.gR.setLatLngs(seg);}
-    else {rs.pO.setLatLngs(b.out.coords);rs.gO.setLatLngs(b.out.coords);rs.pR.setLatLngs(b.ret.coords);rs.gR.setLatLngs(b.ret.coords);}
+      rs.cO.setLatLngs(seg);rs.pO.setLatLngs(seg);rs.cR.setLatLngs([]);rs.pR.setLatLngs([]);}
+    else if(st.phase==="stop"){rs.cO.setLatLngs(b.out.coords);rs.pO.setLatLngs(b.out.coords);rs.cR.setLatLngs([]);rs.pR.setLatLngs([]);}
+    else if(st.phase==="ret"){rs.cO.setLatLngs(b.out.coords);rs.pO.setLatLngs(b.out.coords);
+      const seg=b.ret.coords.slice(0,st.idx).concat([[st.lat,st.lon]]);rs.cR.setLatLngs(seg);rs.pR.setLatLngs(seg);}
+    else {rs.cO.setLatLngs(b.out.coords);rs.pO.setLatLngs(b.out.coords);rs.cR.setLatLngs(b.ret.coords);rs.pR.setLatLngs(b.ret.coords);}
     const c=st.leg.coords,j=Math.max(1,Math.min(st.idx,c.length-1));
     rs.mk.setLatLng([st.lat,st.lon]);rs.mk.setIcon(makeIcon(b,bearing(c[j-1],c[j]),st.phase));
     const row=document.getElementById("br"+i);
@@ -183,33 +194,35 @@ function renderAt(t){
     row.querySelector('[data-f="dst"]').textContent=(st.phase==="out"||st.phase==="ret")?(st.destLeft/1852).toFixed(1):(st.phase==="fin"?"0.0":"—");
     row.querySelector('[data-f="dstl"]').textContent=st.phase==="out"?"Mm do Łeby":st.phase==="ret"?"Mm do Gdańska":st.phase==="fin"?"ukończono":st.phase==="stop"?"w Łebie":"do startu";
   });
+  // headline
   const[A,N]=states;const dr=A.rank-N.rank;
   const sep=(hav([A.lat,A.lon],[N.lat,N.lon])/1852);
   function nm(i){return `<span style="color:${RACE.boats[i].color}">${RACE.boats[i].name.toUpperCase()}</span>`;}
   let lead;
-  if(A.phase==="fin"&&N.phase==="fin"){
-    lead=`META 🏁 · ${nm(0)} WYGRYWA`;
-  }else if(A.phase===N.phase && (A.phase==="out"||A.phase==="ret")){
-    // both on the same leg -> real racing margin = difference in distance-to-mark
+  if(A.phase==="fin"&&N.phase==="fin"){lead=`META 🏁 · ${nm(0)} WYGRYWA`;}
+  else if(A.phase===N.phase && (A.phase==="out"||A.phase==="ret")){
     const li=A.destLeft<=N.destLeft?0:1, margin=Math.abs(A.destLeft-N.destLeft)/1852;
     lead=`PROWADZI ${nm(li)} <span class="gap">· ${margin.toFixed(1)} Mm przewagi</span>`;
-  }else if(Math.abs(dr)<0.001){
-    lead="RÓWNO";
-  }else{
-    const li=dr>0?0:1;
-    lead=`PROWADZI ${nm(li)} <span class="gap">· ${sep.toFixed(1)} Mm od siebie</span>`;
-  }
+  }else if(Math.abs(dr)<0.001){lead="RÓWNO";}
+  else{const li=dr>0?0:1;lead=`PROWADZI ${nm(li)} <span class="gap">· ${sep.toFixed(1)} Mm od siebie</span>`;}
   document.getElementById("lead").innerHTML=lead;
+  // clock
   let tt=((t%86400)+86400)%86400,day=Math.floor(t/86400);
   const dm=DAY_META[Math.max(0,Math.min(day,2))];
   document.getElementById("cday").textContent=`${dm.name} ${dm.date}`;
   document.getElementById("ctime").textContent=String(Math.floor(tt/3600)).padStart(2,"0")+":"+String(Math.floor((tt%3600)/60)).padStart(2,"0");
   document.getElementById("pfill").style.width=(((t-T0)/SPAN)*100).toFixed(2)+"%";
+  // follow-camera: frame both boats, zoomed in
+  const clat=(A.lat+N.lat)/2, clon=(A.lon+N.lon)/2;
+  const dlat=Math.max(Math.abs(A.lat-N.lat)*FOLLOW_MULT, MIN_DLAT);
+  const dlon=Math.max(Math.abs(A.lon-N.lon)*FOLLOW_MULT, MIN_DLON);
+  const bnds=L.latLngBounds([clat-dlat/2,clon-dlon/2],[clat+dlat/2,clon+dlon/2]);
+  map.fitBounds(bnds,{paddingTopLeft:CAM_PAD_TL,paddingBottomRight:CAM_PAD_BR,maxZoom:CAM_MAXZOOM,animate:false});
 }
 
 let tilesLoaded=false;
 base.on("load",()=>{tilesLoaded=true;});
-window.CAP={T0,T1,SPAN,get ready(){return tilesLoaded;},renderAt};
+window.CAP={T0,T1,SPAN,get ready(){return tilesLoaded;},tilesPending(){return pending;},renderAt};
 renderAt(T0);
 </script>
 </body>
@@ -218,7 +231,7 @@ renderAt(T0);
 
 
 def build():
-    print("Building vertical capture page...")
+    print("Building vertical capture page (light theme + follow-cam)...")
     race = build_race()
     html = TEMPLATE.replace("__RACE__", json.dumps(race, ensure_ascii=False))
     path = os.path.join(OUT, "leba-48h-capture.html")
