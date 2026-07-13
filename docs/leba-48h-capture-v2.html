@@ -152,8 +152,8 @@ const STATUS={pre:"przed startem",out:"→ do Łeby",stop:"postój w Łebie",ret
 
 // follow-camera tuning (filled per variant)
 const FOLLOW_MULT=2.0;       // context around the boat separation
-const MIN_DLAT=0.055, MIN_DLON=0.095;   // min view so close/coincident boats aren't over-zoomed
-const CAM_PAD_TL=[46,300], CAM_PAD_BR=[46,380], CAM_MAXZOOM=13.5;
+const MIN_DLAT=0.095, MIN_DLON=0.165;   // min view so close/coincident boats aren't over-zoomed
+const CAM_PAD_TL=[46,300], CAM_PAD_BR=[46,380], CAM_MAXZOOM=12.2;
 
 function renderAt(t){
   const states=RACE.boats.map(b=>boatState(b,t));

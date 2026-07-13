@@ -171,10 +171,10 @@ RACE.boats.forEach((b,i)=>{const el=document.createElement("div");el.className="
 
 const STATUS={pre:"przed startem",out:"→ do Łeby",stop:"postój w Łebie",ret:"← do Gdańska",fin:"na mecie 🏁"};
 
-// follow-camera tuning
-const FOLLOW_MULT=2.0;       // context around the boat separation
-const MIN_DLAT=0.055, MIN_DLON=0.095;   // min view (~6 km) so single-point views aren't over-zoomed
-const CAM_PAD_TL=[46,300], CAM_PAD_BR=[46,380], CAM_MAXZOOM=13.5;
+// follow-camera tuning (filled per variant)
+const FOLLOW_MULT=__FOLLOW_MULT__;       // context around the boat separation
+const MIN_DLAT=__MIN_DLAT__, MIN_DLON=__MIN_DLON__;   // min view so close/coincident boats aren't over-zoomed
+const CAM_PAD_TL=[46,300], CAM_PAD_BR=[46,380], CAM_MAXZOOM=__CAM_MAXZOOM__;
 
 function renderAt(t){
   const states=RACE.boats.map(b=>boatState(b,t));
@@ -230,14 +230,31 @@ renderAt(T0);
 """
 
 
+# follow-camera variants. v1 = original (max zoom-in ~13.5). v2 = less max scale:
+# pulls back when boats are close so more surrounding detail is visible.
+VARIANTS = {
+    "v1": {"page": "leba-48h-capture.html",
+           "follow_mult": 2.0, "min_dlat": 0.055, "min_dlon": 0.095, "maxzoom": 13.5},
+    "v2": {"page": "leba-48h-capture-v2.html",
+           "follow_mult": 2.0, "min_dlat": 0.095, "min_dlon": 0.165, "maxzoom": 12.2},
+}
+
+
 def build():
-    print("Building vertical capture page (light theme + follow-cam)...")
+    print("Building vertical capture pages (light theme + follow-cam)...")
     race = build_race()
-    html = TEMPLATE.replace("__RACE__", json.dumps(race, ensure_ascii=False))
-    path = os.path.join(OUT, "leba-48h-capture.html")
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(html)
-    print(f"Wrote {path}  ({os.path.getsize(path)/1024:.0f} KB)")
+    race_json = json.dumps(race, ensure_ascii=False)
+    for name, v in VARIANTS.items():
+        html = (TEMPLATE
+                .replace("__RACE__", race_json)
+                .replace("__FOLLOW_MULT__", str(v["follow_mult"]))
+                .replace("__MIN_DLAT__", str(v["min_dlat"]))
+                .replace("__MIN_DLON__", str(v["min_dlon"]))
+                .replace("__CAM_MAXZOOM__", str(v["maxzoom"])))
+        path = os.path.join(OUT, v["page"])
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html)
+        print(f"  [{name}] maxzoom={v['maxzoom']}  -> {path}  ({os.path.getsize(path)/1024:.0f} KB)")
 
 
 if __name__ == "__main__":

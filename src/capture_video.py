@@ -16,7 +16,6 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CAP_HTML = os.path.join(ROOT, "docs", "leba-48h-capture.html")
 W, H = 1080, 1920
 
 
@@ -24,14 +23,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--seconds", type=float, default=20.0, help="clip length")
     ap.add_argument("--fps", type=int, default=30)
+    ap.add_argument("--page", default=os.path.join(ROOT, "docs", "leba-48h-capture.html"),
+                    help="capture HTML to render")
     ap.add_argument("--out", default=os.path.join(ROOT, "docs", "leba-48h-clip.mp4"))
     ap.add_argument("--hold", type=float, default=1.2, help="seconds to hold on the final frame")
     args = ap.parse_args()
 
+    cap_html = os.path.abspath(args.page)
     if not shutil.which("ffmpeg"):
         sys.exit("ffmpeg not found on PATH")
-    if not os.path.exists(CAP_HTML):
-        sys.exit(f"missing {CAP_HTML} — run src/generate_leba48_capture.py first")
+    if not os.path.exists(cap_html):
+        sys.exit(f"missing {cap_html} — run src/generate_leba48_capture.py first")
 
     from playwright.sync_api import sync_playwright
 
@@ -47,7 +49,7 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--force-color-profile=srgb", "--hide-scrollbars"])
         page = browser.new_page(viewport={"width": W, "height": H}, device_scale_factor=1)
-        page.goto("file://" + CAP_HTML)
+        page.goto("file://" + cap_html)
         # wait for CAP + tiles
         page.wait_for_function("window.CAP && window.CAP.T0 !== undefined", timeout=30000)
         try:
